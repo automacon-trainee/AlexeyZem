@@ -3,21 +3,13 @@ package main
 import "fmt"
 
 func main() {
-	var numA int
-	var numB int
-	var numC int
-	var numD int
-	var numE int
-	var numF int
-	var numG int
-	var numH int
-	numA = 0
-	numB = 1
-	numC = 1
-	numD = 2
-	numE = 3
-	numF = 5
-	numG = 8
-	numH = 13
+	var numA = 0
+	var numB = 1
+	var numC = 1
+	var numD = 2
+	var numE = 3
+	var numF = 5
+	var numG = 8
+	var numH = 13
 	fmt.Println(numA, numB, numC, numD, numE, numF, numG, numH)
 }
