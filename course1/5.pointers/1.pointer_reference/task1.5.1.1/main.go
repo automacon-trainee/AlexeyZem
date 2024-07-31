@@ -8,7 +8,7 @@ func Add(a, b int) *int {
 	return result
 }
 func Max(numbers []int) *int {
-	result := new(int)
+	result := &numbers[0]
 	for _, n := range numbers {
 		if n > *result {
 			*result = n
