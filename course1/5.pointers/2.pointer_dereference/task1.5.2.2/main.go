@@ -14,8 +14,9 @@ func Factorial(n *int) int {
 }
 
 func isPalindrome(str *string) bool {
-	for i := 0; i < len(*str)/2; i++ {
-		if (*str)[i] != (*str)[len(*str)-i-1] {
+	sl := []rune(*str)
+	for i := 0; i < len(sl)/2; i++ {
+		if (sl)[i] != (sl)[len(sl)-i-1] {
 			return false
 		}
 	}
@@ -33,7 +34,7 @@ func CountOccurrences(numbers *[]int, target *int) int {
 }
 
 func revereString(str *string) string {
-	sl := []byte(*str)
+	sl := []rune(*str)
 	for i := 0; i < len(sl)/2; i++ {
 		sl[i], sl[len(sl)-1-i] = sl[len(sl)-1-i], sl[i]
 	}
@@ -43,7 +44,7 @@ func main() {
 	a := 5
 	fmt.Println(Factorial(&a))
 
-	str := "abba"
+	str := "ава"
 	fmt.Println(isPalindrome(&str))
 
 	fmt.Println(revereString(&str))
