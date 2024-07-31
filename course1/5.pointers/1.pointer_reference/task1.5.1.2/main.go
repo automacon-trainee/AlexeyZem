@@ -7,7 +7,7 @@ func mutate(a *int) {
 }
 
 func revereString(str *string) {
-	sl := []byte(*str)
+	sl := []rune(*str)
 	for i := 0; i < len(sl)/2; i++ {
 		sl[i], sl[len(sl)-1-i] = sl[len(sl)-1-i], sl[i]
 	}
@@ -19,7 +19,7 @@ func main() {
 	mutate(&a)
 	fmt.Println(a)
 
-	str := "Hello"
+	str := "Привет, мир"
 	revereString(&str)
 	fmt.Println(str)
 }
