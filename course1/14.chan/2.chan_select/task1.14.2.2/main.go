@@ -13,11 +13,10 @@ func timeout(timeout time.Duration) func() bool {
 			time.Sleep(time.Millisecond * 3) //some work
 			ch <- true
 		}()
-		time.Sleep(timeout)
 		select {
 		case <-ch:
 			return true
-		default:
+		case <-time.After(timeout):
 			return false
 		}
 	}
