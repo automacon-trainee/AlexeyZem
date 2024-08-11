@@ -8,13 +8,16 @@ func Add(a, b int) *int {
 	return result
 }
 func Max(numbers []int) *int {
-	result := &numbers[0]
-	for _, n := range numbers {
-		if n > *result {
-			*result = n
+	if len(numbers) == 0 {
+		return nil
+	}
+	j := 0
+	for i, n := range numbers {
+		if n > numbers[j] {
+			j = i
 		}
 	}
-	return result
+	return &numbers[j]
 }
 func IsPrime(number int) *bool {
 	result := new(bool)
@@ -42,7 +45,7 @@ func ConcatenateStrings(strs []string) *string {
 	return result
 }
 func main() {
-	fmt.Println(*Max([]int{2, 3, 5, 7, 11, 13, 10}))
+	fmt.Println(*Max([]int{3, 2, 3, 5, 7, 11, 13, 10, 100}))
 	fmt.Println(*Add(1, 2))
 	fmt.Println(*ConcatenateStrings([]string{"jfgef", "wjf", "hifb"}))
 	fmt.Println(*IsPrime(10))
