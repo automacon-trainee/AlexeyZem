@@ -1,7 +1,9 @@
 package main
 
 import (
+	"strconv"
 	"testing"
+	"time"
 )
 
 type testCase struct {
@@ -55,5 +57,38 @@ func TestHashMap(t *testing.T) {
 		if ok {
 			t.Errorf("Get(%s) should fail", val)
 		}
+	}
+}
+
+func TestMeasureTime(t *testing.T) {
+	start := time.Now()
+	res := MeasureTime(func() {
+		time.Sleep(time.Millisecond)
+	})
+	end := time.Since(start)
+	if res > end {
+		t.Errorf("MeasureTime() failed: measure time too large")
+	}
+}
+
+func Benchmark64(b *testing.B) {
+	m := NewHashMap(1000, WithHashCRC64())
+	for i := 0; i < 1000; i++ {
+		m.Set(strconv.Itoa(i), i)
+	}
+
+	for i := 0; i < 1000; i++ {
+		m.Get(strconv.Itoa(i))
+	}
+}
+
+func Benchmark32(b *testing.B) {
+	m := NewHashMap(1000, WithHashCRC32())
+	for i := 0; i < 1000; i++ {
+		m.Set(strconv.Itoa(i), i)
+	}
+
+	for i := 0; i < 1000; i++ {
+		m.Get(strconv.Itoa(i))
 	}
 }
