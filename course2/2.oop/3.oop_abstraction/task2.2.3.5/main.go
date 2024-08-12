@@ -6,6 +6,8 @@ import (
 	"hash/crc32"
 	"hash/crc64"
 	"time"
+
+	"github.com/howeyc/crc16"
 )
 
 type HashMapper interface {
@@ -94,7 +96,7 @@ func (h *HashMap) Get(key string) (any, bool) {
 func Hash(h *HashMap, key string) int {
 	h.hasher.Reset()
 	h.hasher.Write([]byte(key))
-	return int(binary.BigEndian.Uint32(h.hasher.Sum(nil)))
+	return int(binary.BigEndian.Uint16(h.hasher.Sum(nil)))
 }
 
 type Option func(*HashMap)
@@ -115,6 +117,12 @@ func WithHashCRC64() Option {
 func WithHashCRC32() Option {
 	return func(h *HashMap) {
 		h.hasher = crc32.NewIEEE()
+	}
+}
+
+func WithHashCRC16() Option {
+	return func(h *HashMap) {
+		h.hasher = crc16.New(crc16.MakeTable(crc16.SCSI))
 	}
 }
 

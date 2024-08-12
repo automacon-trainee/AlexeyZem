@@ -58,6 +58,24 @@ func TestHashMap(t *testing.T) {
 			t.Errorf("Get(%s) should fail", val)
 		}
 	}
+
+	{
+		h := NewHashMap(1, WithHashCRC16())
+		for _, tc := range tests {
+			h.Set(tc.key, tc.val)
+			v, ok := h.Get(tc.key)
+			if !ok {
+				t.Errorf("Get(%s) failed", tc.key)
+			}
+			if v != tc.want {
+				t.Errorf("Get(%s) got %v, want %v", tc.key, v, tc.want)
+			}
+		}
+		val, ok := h.Get("wrong key")
+		if ok {
+			t.Errorf("Get(%s) should fail", val)
+		}
+	}
 }
 
 func TestMeasureTime(t *testing.T) {
@@ -85,6 +103,18 @@ func Benchmark64(b *testing.B) {
 
 func Benchmark32(b *testing.B) {
 	m := NewHashMap(100, WithHashCRC32())
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		m.Set(strconv.Itoa(i), i)
+	}
+
+	for i := 0; i < b.N; i++ {
+		m.Get(strconv.Itoa(i))
+	}
+}
+
+func Benchmark16(b *testing.B) {
+	m := NewHashMap(100, WithHashCRC16())
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		m.Set(strconv.Itoa(i), i)
