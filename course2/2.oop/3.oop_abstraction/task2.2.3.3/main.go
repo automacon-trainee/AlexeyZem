@@ -25,7 +25,7 @@ type Tabler interface {
 
 type SQLGenerator interface {
 	CreateTableSQL(table Tabler) string
-	CreateInsertSQL(model Tabler) string
+	CreateInsertSQL(user User) string
 }
 
 type SQLLiteGenerator struct {
@@ -34,9 +34,6 @@ type SQLLiteGenerator struct {
 
 func (s *SQLLiteGenerator) CreateTableSQL(user Tabler) string {
 	tableName := user.TableName()
-	if tableName == "" {
-		tableName = userTableName
-	}
 	res := fmt.Sprintf(`CREATE TABLE %s (
 		id SERIAL PRIMARY KEY,
 		first_name VARCHAR(100),
@@ -47,8 +44,9 @@ func (s *SQLLiteGenerator) CreateTableSQL(user Tabler) string {
 	return res
 }
 
-func (s *SQLLiteGenerator) CreateInsertSQL(user Tabler) string {
-	return fmt.Sprintf("INSERT INTO %s (id, first_name, last_name, email) VALUES (%s, %s, %s, %s)", user.TableName())
+func (s *SQLLiteGenerator) CreateInsertSQL(user User) string {
+	return fmt.Sprintf("INSERT INTO %s (id, first_name, last_name, email) VALUES (%d, %s, %s, %s)",
+		user.TableName(), user.ID, user.FirstName, user.LastName, user.Email)
 }
 
 type FakeDataGenerator interface {
@@ -69,17 +67,4 @@ func (g *GoFakeitGenerator) GenerateFakeUser() User {
 	return user
 }
 
-func main() {
-	sqlGenerator := &SQLLiteGenerator{}
-	fakeDataGenerator := &GoFakeitGenerator{}
-
-	user := User{}
-	sql := sqlGenerator.CreateTableSQL(&user)
-	fmt.Println(sql)
-	user = fakeDataGenerator.GenerateFakeUser()
-	fmt.Println(user)
-	for i := 0; i < 34; i++ {
-		user = fakeDataGenerator.GenerateFakeUser()
-		fmt.Println(sqlGenerator.CreateInsertSQL(&user))
-	}
-}
+func main() {}
