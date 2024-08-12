@@ -73,17 +73,19 @@ func TestMeasureTime(t *testing.T) {
 
 func Benchmark64(b *testing.B) {
 	m := NewHashMap(100, WithHashCRC64())
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		m.Set(strconv.Itoa(i), i)
 	}
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < b.N; i++ {
 		m.Get(strconv.Itoa(i))
 	}
 }
 
 func Benchmark32(b *testing.B) {
 	m := NewHashMap(100, WithHashCRC32())
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		m.Set(strconv.Itoa(i), i)
 	}
