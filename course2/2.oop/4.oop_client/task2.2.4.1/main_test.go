@@ -8,12 +8,6 @@ import (
 	"time"
 )
 
-//type TestCases struct{
-//	response string
-//	expected any
-//	err bool
-//}
-
 func TestGetTicker(t *testing.T) {
 	{
 		response := `{
