@@ -185,7 +185,10 @@ func (e *Exmo) GetClosePrice(pair string, limit int, start, end time.Time) ([]fl
 }
 
 func NewExmo(opts ...func(exmo *Exmo)) *Exmo {
-	exmo := &Exmo{}
+	exmo := &Exmo{
+		client: http.DefaultClient,
+		url:    "someURl",
+	}
 	for _, opt := range opts {
 		opt(exmo)
 	}
