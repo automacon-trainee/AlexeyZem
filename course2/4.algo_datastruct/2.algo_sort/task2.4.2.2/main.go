@@ -37,7 +37,7 @@ func MergeSort(list []int) []int {
 }
 
 func Merge(left, right []int) []int {
-	result := make([]int, len(left)+len(right))
+	result := make([]int, 0, len(left)+len(right))
 	for len(left) > 0 && len(right) > 0 {
 		if left[0] <= right[0] {
 			result = append(result, left[0])

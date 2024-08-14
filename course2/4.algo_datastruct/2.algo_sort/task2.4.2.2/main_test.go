@@ -1,6 +1,7 @@
 package main
 
 import (
+	"reflect"
 	"sort"
 	"testing"
 )
@@ -60,6 +61,27 @@ func TestGeneralSort(t *testing.T) {
 		GeneralSort(v.data)
 		if !sort.IntsAreSorted(v.data) {
 			t.Errorf("GeneralSort(%v) failed", v.data)
+		}
+	}
+}
+
+type TestCaseMerge struct {
+	left  []int
+	right []int
+	want  []int
+}
+
+func TestMerge(t *testing.T) {
+	tests := []TestCaseMerge{
+		{[]int{}, []int{}, []int{}},
+		{[]int{1, 3, 5}, []int{2, 4, 6}, []int{1, 2, 3, 4, 5, 6}},
+		{[]int{1, 3, 5}, []int{}, []int{1, 3, 5}},
+		{[]int{}, []int{2, 4, 6}, []int{2, 4, 6}},
+	}
+	for _, v := range tests {
+		res := Merge(v.left, v.right)
+		if !reflect.DeepEqual(res, v.want) {
+			t.Errorf("Merge(%v, %v) failed", v.left, v.right)
 		}
 	}
 }
