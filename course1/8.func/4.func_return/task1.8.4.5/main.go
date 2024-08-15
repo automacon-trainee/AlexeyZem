@@ -2,23 +2,19 @@ package main
 
 import (
 	"fmt"
+	"math"
 )
 
 func CalculatePercentageChange(initalValue, finalValue float64) float64 {
-	defer func() {
-		if err := recover(); err != nil {
-			fmt.Println("Zero value")
-		}
-	}()
-	fromNumToPercent := 100.0
-	if finalValue > initalValue {
-		return (finalValue/initalValue - 1) * fromNumToPercent
+	if initalValue == 0 {
+		return 0
 	}
-	return (finalValue/initalValue - 1) * -fromNumToPercent
+	fromNumToPercent := 100.0
+	return math.Abs((finalValue/initalValue - 1) * fromNumToPercent)
 }
 
 func main() {
 	initialValue := 10.0
-	finalValue := 10.6
+	finalValue := 16.6
 	fmt.Println(CalculatePercentageChange(initialValue, finalValue))
 }
