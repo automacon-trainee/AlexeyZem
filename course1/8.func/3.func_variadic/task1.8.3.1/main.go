@@ -2,19 +2,12 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func userInfo(name string, age int, cities ...string) string {
-	res := fmt.Sprintf("Имя: %s, возраст: %d, города: ", name, age)
-
-	for i, city := range cities {
-		if i != len(cities)-1 {
-			res += city + ", "
-		} else {
-			res += city
-		}
-	}
-
+	city := strings.Join(cities, ", ")
+	res := fmt.Sprintf("Имя: %s, возраст: %d, города: %v", name, age, city)
 	return res
 }
 
