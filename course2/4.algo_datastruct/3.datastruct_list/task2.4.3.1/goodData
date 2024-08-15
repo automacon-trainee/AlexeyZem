@@ -1,0 +1,12 @@
+[
+    {
+        "uuid": "123",
+        "message": "some message",
+        "date": "2 november"
+    },
+    {
+        "uuid": "456",
+        "message": "some message2",
+        "date": "3 november"
+    }
+]
