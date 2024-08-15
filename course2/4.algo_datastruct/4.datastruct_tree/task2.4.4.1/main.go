@@ -13,7 +13,6 @@ type User struct {
 }
 
 type Node struct {
-	index int
 	left  *Node
 	right *Node
 	data  *User
@@ -55,20 +54,16 @@ func (t *BinaryTree) Search(key int) *User {
 }
 
 func (n *Node) Search(key int) *User {
+	if n == nil {
+		return nil
+	}
 	if n.data.ID == key {
 		return n.data
-	} else if n.data.ID > key {
-		if n.left != nil {
-			return n.left.Search(key)
-		} else {
-			return nil
-		}
+	}
+	if n.data.ID > key {
+		return n.left.Search(key)
 	} else {
-		if n.right != nil {
-			return n.right.Search(key)
-		} else {
-			return nil
-		}
+		return n.right.Search(key)
 	}
 }
 
@@ -101,8 +96,9 @@ func PrintNode(n *Node) {
 }
 
 func main() {
-	bt := GenerateData(30)
-	user := bt.Search(30)
+	count := 30
+	bt := GenerateData(count)
+	user := bt.Search(count)
 	if user != nil {
 		fmt.Println(user)
 	} else {
