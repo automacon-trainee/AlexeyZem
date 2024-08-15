@@ -6,8 +6,7 @@ import (
 
 func CalculateStockValue(price float64, quantity int) (sum, one float64) {
 	sum = price * float64(quantity)
-	one = price
-	return sum, one
+	return sum, price
 }
 
 func main() {

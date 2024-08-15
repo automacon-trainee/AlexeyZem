@@ -5,14 +5,12 @@ import (
 )
 
 func DevideAndRemainder(a, b int) (dev, rem int) {
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("check zero argument")
-		}
-	}()
+	if b == 0 {
+		return 0, 0
+	}
 	dev = a / b
 	rem = a % b
-	return dev, rem
+	return
 }
 
 func main() {
