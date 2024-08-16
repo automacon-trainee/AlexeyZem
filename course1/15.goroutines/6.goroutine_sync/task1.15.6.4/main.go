@@ -26,8 +26,8 @@ func NewCache() *Cache {
 
 func (c *Cache) Set(key string, user *User) {
 	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.Data[key] = user
-	c.mu.Unlock()
 }
 
 func (c *Cache) Get(key string) *User {
