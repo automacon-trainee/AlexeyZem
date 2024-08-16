@@ -15,7 +15,7 @@ func TestHashMapList(t *testing.T) {
 		{key: "f", val: "want f", want: "want f"},
 	}
 	{
-		h := NewHashMapList()
+		h := NewHashMapList(1, WithHashCRC32List())
 		for _, tc := range tests {
 			h.Set(tc.key, tc.val)
 			v, ok := h.Get(tc.key)
@@ -28,14 +28,14 @@ func TestHashMapList(t *testing.T) {
 		}
 	}
 	{
-		h := NewHashMapList()
+		h := NewHashMapList(0, WithHashCRC64List())
 		_, ok := h.Get("aln")
 		if ok {
 			t.Errorf("Get() should fail")
 		}
 	}
 	{
-		h := NewHashMapList()
+		h := NewHashMapList(1, WithHashCRC64List())
 		h.Set(tests[0].key, tests[0].val)
 		_, ok := h.Get("wrong key")
 		if ok {

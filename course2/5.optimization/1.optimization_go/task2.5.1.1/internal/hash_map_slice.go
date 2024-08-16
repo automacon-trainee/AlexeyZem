@@ -83,22 +83,22 @@ func (h *HashMapSlice) Get(key string) (any, bool) {
 	return nil, false
 }
 
-type Option func(slice *HashMapSlice)
+type OptionSlice func(slice *HashMapSlice)
 
-func NewHashMapSlice(size int, opt Option) *HashMapSlice {
+func NewHashMapSlice(size int, opt OptionSlice) *HashMapSlice {
 	data := make([]*Data, size)
 	h := &HashMapSlice{data: data, length: 0}
 	opt(h)
 	return h
 }
 
-func WithHashCRC64() Option {
+func WithHashCRC64Slice() OptionSlice {
 	return func(h *HashMapSlice) {
 		h.hasher = crc64.New(crc64.MakeTable(crc64.ECMA))
 	}
 }
 
-func WithHashCRC32() Option {
+func WithHashCRC32Slice() OptionSlice {
 	return func(h *HashMapSlice) {
 		h.hasher = crc32.NewIEEE()
 	}

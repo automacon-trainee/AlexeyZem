@@ -21,7 +21,7 @@ func TestHashMapSlice(t *testing.T) {
 		{key: "f", val: "want f", want: "want f"},
 	}
 	{
-		h := NewHashMapSlice(1, WithHashCRC32())
+		h := NewHashMapSlice(1, WithHashCRC32Slice())
 		for _, tc := range tests {
 			h.Set(tc.key, tc.val)
 			v, ok := h.Get(tc.key)
@@ -40,7 +40,7 @@ func TestHashMapSlice(t *testing.T) {
 	}
 
 	{
-		h := NewHashMapSlice(1, WithHashCRC64())
+		h := NewHashMapSlice(1, WithHashCRC64Slice())
 		for _, tc := range tests {
 			h.Set(tc.key, tc.val)
 			v, ok := h.Get(tc.key)
@@ -58,14 +58,14 @@ func TestHashMapSlice(t *testing.T) {
 	}
 
 	{
-		h := NewHashMapSlice(1, WithHashCRC32())
+		h := NewHashMapSlice(1, WithHashCRC32Slice())
 		_, ok := h.Get("wrong key")
 		if ok {
 			t.Errorf("Get should fail")
 		}
 	}
 	{
-		h := NewHashMapSlice(1, WithHashCRC64())
+		h := NewHashMapSlice(1, WithHashCRC64Slice())
 		h.Set(tests[0].key, tests[0].val)
 		_, ok := h.Get("wrong key")
 		if ok {
