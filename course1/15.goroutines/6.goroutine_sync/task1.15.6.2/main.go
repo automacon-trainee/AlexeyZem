@@ -13,8 +13,8 @@ type Counter struct {
 
 func (c *Counter) Incr() {
 	c.mu.Lock()
+	defer c.mu.Unlock()
 	c.value++
-	c.mu.Unlock()
 }
 
 func concurrentSafeCounter() int {
