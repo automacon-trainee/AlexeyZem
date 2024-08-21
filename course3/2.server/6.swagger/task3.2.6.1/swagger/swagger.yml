@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: Swagger Address - OpenAPI 3.0
+  description: |-
+    GeoData
+  version: 1.0.11
+
+servers:
+  - url: https://localhost:8080/api/address
+
+paths:
+  /search:
+    post:
+      summary: search addres bu Lon and Lat
+      operationId: SearchAddress
+      requestBody:
+        description: Search addres
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchAddres'
+        required: true
+      responses:
+        "200":
+          description: Successfuly added
+          content:
+            text:
+              example: "You are in Country:Russia, Town:Moscow, Road:red square"
+        "400":
+          description: Invalid Input
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /geocode:
+    post:
+      summary: search geogocde by address
+      operationId: SearchGeocode
+      requestBody:
+        description: Search geocode
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchGeogode'
+        required: true
+      responses:
+        "200":
+          description: Successfuly added
+          content:
+            text:
+              example: "Coordinate: Lon: 12.12, Lat: 55.12"
+        "400":
+          description: Invalid Input
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+
+
+components:
+  schemas:
+    SearchAddres:
+      type: object
+      properties:
+        Lat:
+          type: number
+          example: 12.12
+        Lng:
+          type: number
+          example: 51.14
+
+    SearchGeogode:
+      type: object
+      properties:
+        address:
+          type: object
+          properties:
+            road:
+              type: string
+              example: "red square"
+            town:
+              type: string
+              example: "Moscow"
+            county:
+              type: string
+            state:
+              type: string
+            postcode:
+              type: string
+            country:
+              type: string
+            country_code:
+              type: string
+
+
+
