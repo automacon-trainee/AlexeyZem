@@ -18,6 +18,6 @@ import (
 )
 
 func main() {
-	server := internal.NewServer()
+	server := internal.NewServer(internal.NewRouter())
 	log.Fatal(server.Start())
 }

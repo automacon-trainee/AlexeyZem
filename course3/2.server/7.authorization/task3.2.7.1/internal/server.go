@@ -28,12 +28,14 @@ func handlerNot(w http.ResponseWriter, _ *http.Request) {
 	_, _ = w.Write([]byte("not found"))
 }
 
-type Server struct{}
+type Server struct {
+	router *chi.Mux
+}
 
-func NewServer() *Server {
-	return &Server{}
+func NewServer(r *chi.Mux) *Server {
+	return &Server{router: r}
 }
 
 func (s *Server) Start() error {
-	return http.ListenAndServe(":8080", NewRouter())
+	return http.ListenAndServe(":8080", s.router)
 }
