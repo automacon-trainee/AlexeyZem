@@ -8,14 +8,14 @@ import (
 )
 
 func CalculatePercentageChange(initalValue, finalValue string) (float64, error) {
-	if initalValue == "0" {
-		return 0.0, errors.New("inital value is zero")
-	}
 	finValue, err := strconv.ParseFloat(finalValue, 64)
 	if err != nil {
 		return 0, err
 	}
 	initValue, err := strconv.ParseFloat(initalValue, 64)
+	if initValue == 0.0 {
+		return 0, errors.New("inital value is zero")
+	}
 	if err != nil {
 		return 0, err
 	}
