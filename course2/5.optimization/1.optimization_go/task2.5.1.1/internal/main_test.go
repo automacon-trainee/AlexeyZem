@@ -6,25 +6,25 @@ import (
 )
 
 func BenchmarkHashMapSliceCRC64(b *testing.B) {
-	hashSl := NewHashMapSlice(1, WithHashCRC64Slice())
+	hashSl := NewHashMap(NewSlice(1), WithHashCRC64())
 	b.ResetTimer()
-	for i := 0; i < 50000; i++ {
+	for i := 0; i < 10000; i++ {
 		hashSl.Set(strconv.Itoa(i), strconv.Itoa(i))
 		hashSl.Get(strconv.Itoa(i))
 	}
 }
 
 func BenchmarkHashMapSliceCRC32(b *testing.B) {
-	hashSl := NewHashMapSlice(1, WithHashCRC32Slice())
+	hashSl := NewHashMap(NewSlice(1), WithHashCRC32())
 	b.ResetTimer()
-	for i := 0; i < 50000; i++ {
+	for i := 0; i < 10000; i++ {
 		hashSl.Set(strconv.Itoa(i), strconv.Itoa(i))
 		hashSl.Get(strconv.Itoa(i))
 	}
 }
 
 func BenchmarkHashMapListCRC64(b *testing.B) {
-	hashL := NewHashMapList(1, WithHashCRC64List())
+	hashL := NewHashMap(CreateNewList(1), WithHashCRC64())
 	b.ResetTimer()
 	for i := 0; i < 10000; i++ {
 		hashL.Set(strconv.Itoa(i), strconv.Itoa(i))
@@ -32,7 +32,7 @@ func BenchmarkHashMapListCRC64(b *testing.B) {
 	}
 }
 func BenchmarkHashMapListCRC32(b *testing.B) {
-	hashL := NewHashMapList(1, WithHashCRC32List())
+	hashL := NewHashMap(CreateNewList(1), WithHashCRC32())
 	b.ResetTimer()
 	for i := 0; i < 10000; i++ {
 		hashL.Set(strconv.Itoa(i), strconv.Itoa(i))
