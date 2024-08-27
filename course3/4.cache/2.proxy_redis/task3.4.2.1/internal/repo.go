@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -45,7 +44,6 @@ func (s *SomeRepositoryProxyImpl) GetData(key string) string {
 	val, err := s.cache.Get(key).Result()
 	if errors.Is(err, redis.Nil) {
 		val = s.someRepo.GetData(key)
-		fmt.Println("hello from orig repo")
 		s.cache.Set(key, val, expiration)
 	}
 	return val
