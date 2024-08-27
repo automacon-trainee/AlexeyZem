@@ -15,12 +15,14 @@ type LibraryFacade struct {
 }
 
 type Servicer interface {
-	startService() error
+	StartService() error
 	TakeBook(userID, bookID int) error
 	ReturnBook(book entities.Book) error
 	AllUsersInfo() ([]entities.User, error)
 	AllAuthorsInfo() ([]entities.Author, error)
 	AddBook(book entities.Book) error
+	AddUser(user entities.User) error
+	AddAuthor(author entities.Author) error
 	GetAllBooks() ([]entities.Book, error)
 	BookInfo(bookID int) (entities.Book, error)
 	AuthorInfo(authorID int) (entities.Author, error)
@@ -29,11 +31,11 @@ type Servicer interface {
 
 func NewLibraryFacade(repo repository.Librarer) (*LibraryFacade, error) {
 	lf := &LibraryFacade{Repo: repo}
-	err := lf.startService()
+	err := lf.StartService()
 	return lf, err
 }
 
-func (lf *LibraryFacade) startService() error {
+func (lf *LibraryFacade) StartService() error {
 	authorsNumber, err := lf.Repo.HowManyAuthorsExist()
 	if err != nil {
 		return err
@@ -43,9 +45,24 @@ func (lf *LibraryFacade) startService() error {
 		minBooksNumber = 100
 		minUsersNumber = 50
 	)
+	randomer := rand.New(rand.NewSource(time.Now().UnixNano()))
 	if authorsNumber < minAuthors {
 		for i := 0; i < (10 - authorsNumber); i++ {
-			err = lf.Repo.CreateAuthor(gofakeit.Name())
+			authorID := randomer.Intn(authorsNumber) + 1
+			err = lf.Repo.CreateAuthor(entities.Author{
+				ID:   authorID,
+				Name: gofakeit.Name(),
+				Books: []entities.Book{
+					{
+						Name:     gofakeit.Word(),
+						AuthorID: authorID,
+					},
+					{
+						Name:     gofakeit.Word(),
+						AuthorID: authorID,
+					},
+				},
+			})
 			if err != nil {
 				return err
 			}
@@ -60,7 +77,6 @@ func (lf *LibraryFacade) startService() error {
 
 	if booksNumber < minBooksNumber {
 		for i := 0; i < (100 - booksNumber); i++ {
-			randomer := rand.New(rand.NewSource(time.Now().UnixNano()))
 			authorID := randomer.Intn(authorsNumber) + 1
 
 			book := entities.Book{
@@ -113,6 +129,14 @@ func (lf *LibraryFacade) AllAuthorsInfo() ([]entities.Author, error) {
 
 func (lf *LibraryFacade) AddBook(book entities.Book) error {
 	return lf.Repo.CreateBook(book)
+}
+
+func (lf *LibraryFacade) AddUser(user entities.User) error {
+	return lf.Repo.CreateUser(user)
+}
+
+func (lf *LibraryFacade) AddAuthor(author entities.Author) error {
+	return lf.Repo.CreateAuthor(author)
 }
 
 func (lf *LibraryFacade) GetAllBooks() ([]entities.Book, error) {

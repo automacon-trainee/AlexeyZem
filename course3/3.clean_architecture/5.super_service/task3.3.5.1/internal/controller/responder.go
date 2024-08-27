@@ -52,7 +52,7 @@ func (r *ResponderImpl) ErrorInternalServerError(w http.ResponseWriter, err erro
 	}
 }
 
-func (r ResponderImpl) ErrorNotFound(w http.ResponseWriter) {
+func (r *ResponderImpl) ErrorNotFound(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusNotFound)
 	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: "", Message: "not found"})

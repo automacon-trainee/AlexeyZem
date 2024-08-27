@@ -14,7 +14,7 @@ type LibraryRepo struct {
 }
 
 type Librarer interface {
-	CreateAuthor(authorName string) error
+	CreateAuthor(author entities.Author) error
 	CreateBook(book entities.Book) error
 	CreateUser(user entities.User) error
 	TakeBook(userID, bookID int) error
@@ -85,7 +85,7 @@ func (ls *LibraryRepo) CreateAuthorsTable() error {
 	return err
 }
 
-func (ls *LibraryRepo) CreateAuthor(authorName string) error {
+func (ls *LibraryRepo) CreateAuthor(author entities.Author) error {
 	tx, err := ls.db.Begin()
 	if err != nil {
 		return err
@@ -93,7 +93,7 @@ func (ls *LibraryRepo) CreateAuthor(authorName string) error {
 
 	query := ` INSERT INTO authors (name) VALUES ($1)`
 
-	result, err := tx.Exec(query, authorName)
+	result, err := tx.Exec(query, author.Name)
 	if err != nil {
 		_ = tx.Rollback()
 		return err
@@ -105,9 +105,18 @@ func (ls *LibraryRepo) CreateAuthor(authorName string) error {
 	}
 
 	if rowsAffected == 0 {
-		return fmt.Errorf("user with username %s already exists", authorName)
+		return fmt.Errorf("user with username %s already exists", author.Name)
 	}
 
+	for _, book := range author.Books {
+		book.AuthorID = author.ID
+		err = ls.CreateBook(book)
+		if err != nil {
+			_ = tx.Rollback()
+			return err
+		}
+	}
+	
 	return tx.Commit()
 }
 

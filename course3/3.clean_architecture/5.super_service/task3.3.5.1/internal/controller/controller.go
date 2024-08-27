@@ -2,7 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/go-chi/chi"
@@ -20,6 +22,8 @@ type UserController interface {
 	GetAllUsers(w http.ResponseWriter, r *http.Request)
 	GetAllAuthors(w http.ResponseWriter, r *http.Request)
 	AddBook(w http.ResponseWriter, r *http.Request)
+	AddUser(w http.ResponseWriter, r *http.Request)
+	AddAuthor(w http.ResponseWriter, r *http.Request)
 	GetAllBooks(w http.ResponseWriter, r *http.Request)
 	TakeBook(w http.ResponseWriter, r *http.Request)
 	ReturnBook(w http.ResponseWriter, r *http.Request)
@@ -30,7 +34,7 @@ type UserController interface {
 }
 
 func NewController(serv service.Servicer) UserController {
-	return &UserControllerImpl{Service: serv}
+	return &UserControllerImpl{Service: serv, responder: NewResponder(log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds))}
 }
 
 func (us *UserControllerImpl) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -110,6 +114,7 @@ func (us *UserControllerImpl) AddBook(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&book)
 	if err != nil {
 		us.responder.ErrorBadRequest(w, err)
+		return
 	}
 
 	err = us.Service.AddBook(book)
@@ -120,12 +125,44 @@ func (us *UserControllerImpl) AddBook(w http.ResponseWriter, r *http.Request) {
 	us.responder.OutputJSON(w, book)
 }
 
+func (us *UserControllerImpl) AddUser(w http.ResponseWriter, r *http.Request) {
+	var user entities.User
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		us.responder.ErrorBadRequest(w, err)
+		return
+	}
+
+	err = us.Service.AddUser(user)
+	if err != nil {
+		us.responder.ErrorInternalServerError(w, err)
+		return
+	}
+	us.responder.OutputJSON(w, user)
+}
+
+func (us *UserControllerImpl) AddAuthor(w http.ResponseWriter, r *http.Request) {
+	var author entities.Author
+	err := json.NewDecoder(r.Body).Decode(&author)
+	if err != nil {
+		us.responder.ErrorBadRequest(w, err)
+		return
+	}
+	err = us.Service.AddAuthor(author)
+	if err != nil {
+		us.responder.ErrorInternalServerError(w, err)
+		return
+	}
+	us.responder.OutputJSON(w, author)
+}
+
 func (us *UserControllerImpl) TakeBook(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
 	var book entities.Book
 	err := json.NewDecoder(r.Body).Decode(&book)
 	if err != nil {
 		us.responder.ErrorBadRequest(w, err)
+		return
 	}
 
 	userID, err := strconv.Atoi(id)
@@ -147,6 +184,7 @@ func (us *UserControllerImpl) ReturnBook(w http.ResponseWriter, r *http.Request)
 	err := json.NewDecoder(r.Body).Decode(&book)
 	if err != nil {
 		us.responder.ErrorBadRequest(w, err)
+		return
 	}
 
 	err = us.Service.ReturnBook(book)
