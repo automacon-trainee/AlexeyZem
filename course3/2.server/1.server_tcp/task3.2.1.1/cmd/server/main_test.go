@@ -11,10 +11,11 @@ func TestBroadcaster(t *testing.T) {
 	ch2 := make(chan string, 1)
 	cl1 := Client{ch: ch1}
 	cl2 := Client{ch: ch2}
-	go broadcaster()
-	entering <- cl1
-	entering <- cl2
-	messages <- "Hello World"
+	chat := NewChat()
+	go broadcaster(chat)
+	chat.entering <- cl1
+	chat.entering <- cl2
+	chat.msg <- "Hello World"
 
 	if <-ch1 != "Hello World" {
 		t.Errorf("ch1 != \"Hello World\"")
@@ -62,7 +63,8 @@ func TestClientWriter(t *testing.T) {
 
 func TestHandleConn(t *testing.T) {
 	conn := &mockConn{}
-	go handleConn(conn)
+	chat := NewChat()
+	go handleConn(conn, chat)
 	time.Sleep(1 * time.Second)
 	if conn.writeData == "" {
 		t.Errorf("conn.writeData is empty")
