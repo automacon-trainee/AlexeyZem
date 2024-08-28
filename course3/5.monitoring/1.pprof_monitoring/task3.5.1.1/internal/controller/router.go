@@ -10,7 +10,6 @@ import (
 )
 
 func NewRouter(controller Controller, auth *jwtauth.JWTAuth) *chi.Mux {
-
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Group(func(router chi.Router) {

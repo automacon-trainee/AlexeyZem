@@ -49,8 +49,8 @@ func NewServer() (*http.Server, error) {
 	geoProxy := service.NewGeodataServiceProxy(geoService, redisClient)
 	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	responder := controller.NewResponder(logger)
-	controll := controller.NewGeoController(responder, geoProxy, userProxy)
-	rout := controller.NewRouter(controll, token)
+	control := controller.NewGeoController(responder, geoProxy, userProxy)
+	rout := controller.NewRouter(control, token)
 	server := http.Server{
 		Addr:         ":8080",
 		Handler:      rout,

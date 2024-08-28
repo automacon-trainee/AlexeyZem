@@ -83,7 +83,6 @@ func (db *PostgressDataBase) GetByID(ctx context.Context, id string) (models.Use
 	err := row.Scan(&user.Username, &user.Email)
 
 	if err != nil {
-
 		if errors.Is(err, sql.ErrNoRows) {
 			return user, fmt.Errorf("user with ID %s not found", id)
 		}
@@ -114,7 +113,7 @@ func (db *PostgressDataBase) List(ctx context.Context) ([]models.User, error) {
 		users = append(users, user)
 	}
 
-	if err = rows.Err(); err != nil {
+	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 

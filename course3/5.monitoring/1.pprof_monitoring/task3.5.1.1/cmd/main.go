@@ -29,7 +29,7 @@ func main() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT)
 	sig := <-sigChan
-	fmt.Printf("Recieved signal: %v. Starting shutting down\n", sig)
+	fmt.Printf("Received signal: %v. Starting shutting down\n", sig)
 
 	shuttingDownTime := 5 * time.Second
 	ctx, cancel := context.WithTimeout(context.Background(), shuttingDownTime)
@@ -41,5 +41,4 @@ func main() {
 	if err == nil {
 		log.Println("Server stopped gracefully")
 	}
-
 }

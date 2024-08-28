@@ -19,6 +19,10 @@ services:
       - POSTGRES_PASSWORD=postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: "pg_isready --username=postgres && psql --username=postgres --list"
+      timeout: 10s
+      retries: 20
 
 volumes:
   postgres_data:

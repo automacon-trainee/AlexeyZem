@@ -70,12 +70,12 @@ func (gc *GeoController) Search(w http.ResponseWriter, r *http.Request) {
 		gc.responder.ErrorBadRequest(w, err)
 		return
 	}
-	addres, err := gc.serviceGeo.Search(coord)
+	address, err := gc.serviceGeo.Search(coord)
 	if err != nil {
 		gc.responder.ErrorInternal(w, err)
 		return
 	}
-	gc.responder.OutputJSON(w, addres)
+	gc.responder.OutputJSON(w, address)
 }
 
 func (gc *GeoController) Geocode(w http.ResponseWriter, r *http.Request) {
