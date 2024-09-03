@@ -44,7 +44,7 @@ func (r *Respond) ErrorUnAuthorized(w http.ResponseWriter, err error) {
 	r.logger.Println(err)
 	w.Header().Set("Content-Type", "application/json:charset=UTF-8")
 	w.WriteHeader(http.StatusUnauthorized)
-	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: nil, Message: err.Error()})
+	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: err.Error(), Message: "unauthorized"})
 	if errJ != nil {
 		r.logger.Println(err)
 	}
@@ -54,7 +54,7 @@ func (r *Respond) ErrorBadRequest(w http.ResponseWriter, err error) {
 	r.logger.Println(err)
 	w.Header().Set("Content-Type", "application/json:charset=UTF-8")
 	w.WriteHeader(http.StatusBadRequest)
-	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: nil, Message: err.Error()})
+	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: err.Error(), Message: "bad request"})
 	if errJ != nil {
 		r.logger.Println(err)
 	}
@@ -62,13 +62,13 @@ func (r *Respond) ErrorBadRequest(w http.ResponseWriter, err error) {
 
 func (r *Respond) ErrorInternal(w http.ResponseWriter, err error) {
 	r.logger.Println(err)
+	w.Header().Set("Content-Type", "application/json:charset=UTF-8")
 	if errors.Is(err, context.Canceled) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json:charset=UTF-8")
 	w.WriteHeader(http.StatusInternalServerError)
-	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: nil, Message: err.Error()})
+	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: err.Error(), Message: "internal server error"})
 	if errJ != nil {
 		r.logger.Println(err)
 	}
@@ -78,7 +78,7 @@ func (r *Respond) ErrorForbidden(w http.ResponseWriter, err error) {
 	r.logger.Println(err)
 	w.Header().Set("Content-Type", "application/json:charset=UTF-8")
 	w.WriteHeader(http.StatusForbidden)
-	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: nil, Message: err.Error()})
+	errJ := json.NewEncoder(w).Encode(&Response{Success: false, Data: err.Error(), Message: "error forbidden"})
 	if errJ != nil {
 		r.logger.Println(err)
 	}

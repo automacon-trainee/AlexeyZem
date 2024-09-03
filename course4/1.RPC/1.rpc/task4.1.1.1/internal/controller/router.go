@@ -11,7 +11,6 @@ import (
 )
 
 func NewRouter(controller Controller, auth *jwtauth.JWTAuth) *chi.Mux {
-
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Group(func(router chi.Router) {
@@ -22,7 +21,6 @@ func NewRouter(controller Controller, auth *jwtauth.JWTAuth) *chi.Mux {
 		router.Get("/api/users", controller.GetAllUsers)
 		router.Get("/api/users/{email}", controller.GetByEmail)
 		router.Get("/debug/pprof/", pprof.Index)
-
 	})
 	router.Get("/metrics", promhttp.Handler().ServeHTTP)
 	router.Post("/api/users/login", controller.Auth)

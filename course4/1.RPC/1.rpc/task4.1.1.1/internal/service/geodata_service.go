@@ -63,11 +63,14 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 	}
 
 	coord := []models.ResponseAddressGeocode{}
-	res = &coord[0]
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return err
 	}
+	if len(coord) == 0 {
+		return errors.New("no result")
+	}
+	*res = coord[0]
 	return nil
 }
 

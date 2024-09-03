@@ -46,7 +46,6 @@ func (s *UserServiceImpl) AuthUser(user models.User) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	fmt.Println()
 	err = bcrypt.CompareHashAndPassword([]byte(userBD.Password), []byte(user.Password))
 	if err != nil {
 		return "", fmt.Errorf("wrong password")
