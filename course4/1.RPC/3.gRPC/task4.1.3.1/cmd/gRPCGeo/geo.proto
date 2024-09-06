@@ -2,7 +2,7 @@ syntax="proto3";
 
 package gRPCGeo;
 
-option go_package = "/go;grpcservice";
+option go_package = "metrics/cmd/gRPCGeo";
 
 service GeoService{
   rpc SearchAnswer(RequestAddressGeocode) returns (ResponseAddress) {}
