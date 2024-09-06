@@ -5,25 +5,23 @@ import (
 	"errors"
 	"net/http"
 
-	"projectService/internal/model"
-	"projectService/internal/service"
-
 	"projectService/internal/custom_error"
+	"projectService/internal/model"
 )
 
-type Controller interface {
-	Register(w http.ResponseWriter, r *http.Request)
-	Auth(w http.ResponseWriter, r *http.Request)
-	Search(w http.ResponseWriter, r *http.Request)
-	Geocode(w http.ResponseWriter, r *http.Request)
+type GeoServicer interface {
+	CreateUser(user model.User) error
+	AuthUser(user model.User) (string, error)
+	Search(geocode model.RequestAddressGeocode) (model.ResponseAddress, error)
+	Geocode(address model.ResponseAddress) (model.ResponseAddressGeocode, error)
 }
 
 type GeoController struct {
 	responder Responder
-	service   service.GeoServicer
+	service   GeoServicer
 }
 
-func NewGeoController(responder Responder, serv service.GeoServicer) *GeoController {
+func NewGeoController(responder Responder, serv GeoServicer) *GeoController {
 	return &GeoController{
 		responder: responder,
 		service:   serv,

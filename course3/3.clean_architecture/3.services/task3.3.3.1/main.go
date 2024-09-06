@@ -22,12 +22,18 @@ import (
 	"time"
 
 	"projectService/internal/controller"
+
+	"projectService/internal/service"
 )
 
 func main() {
+	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
+	responder := controller.NewResponder(logger)
+	serv := service.NewService()
+	contr := controller.NewGeoController(responder, serv)
 	server := http.Server{
 		Addr:         ":8080",
-		Handler:      controller.NewRouter(),
+		Handler:      controller.NewRouter(contr),
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}

@@ -1,21 +1,16 @@
 package controller
 
 import (
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/jwtauth"
 
 	"projectService/internal/model"
-	"projectService/internal/service"
 )
 
-func NewRouter() *chi.Mux {
-	logger := log.New(os.Stdout, "http: ", log.LstdFlags)
-	contr := NewGeoController(NewResponder(logger), service.NewService())
+func NewRouter(contr *GeoController) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)
 	router.Group(func(router chi.Router) {

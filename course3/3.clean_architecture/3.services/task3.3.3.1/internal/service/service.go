@@ -12,18 +12,16 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 
+	"projectService/internal/controller"
 	"projectService/internal/custom_error"
 	"projectService/internal/model"
 )
 
-type GeoServicer interface {
-	CreateUser(user model.User) error
-	AuthUser(user model.User) (string, error)
-	Search(geocode model.RequestAddressGeocode) (model.ResponseAddress, error)
-	Geocode(address model.ResponseAddress) (model.ResponseAddressGeocode, error)
-}
-
 type Service struct{}
+
+func NewService() controller.GeoServicer {
+	return &Service{}
+}
 
 func (s *Service) CreateUser(user model.User) error {
 	if _, ok := model.Storage[user.Username]; ok {
@@ -87,10 +85,6 @@ func (s *Service) Geocode(address model.ResponseAddress) (model.ResponseAddressG
 		return model.ResponseAddressGeocode{}, err
 	}
 	return coord[0], nil
-}
-
-func NewService() GeoServicer {
-	return &Service{}
 }
 
 func GetQuery(address model.ResponseAddress) string {
