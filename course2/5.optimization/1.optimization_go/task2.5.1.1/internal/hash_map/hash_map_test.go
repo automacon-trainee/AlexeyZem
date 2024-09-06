@@ -1,7 +1,10 @@
-package internal
+package hash_map
 
 import (
 	"testing"
+
+	"hashMap/internal/list"
+	"hashMap/internal/slice"
 )
 
 type testCase struct {
@@ -21,7 +24,7 @@ func TestHashMapList(t *testing.T) {
 		{key: "f", val: "want f", want: "want f"},
 	}
 	{
-		h := NewHashMap(CreateNewList(3), WithHashCRC32())
+		h := NewHashMap(list.CreateNewList(3), WithHashCRC32())
 		for _, tc := range tests {
 			h.Set(tc.key, tc.val)
 			v, ok := h.Get(tc.key)
@@ -34,14 +37,14 @@ func TestHashMapList(t *testing.T) {
 		}
 	}
 	{
-		h := NewHashMap(CreateNewList(0), WithHashCRC64())
+		h := NewHashMap(list.CreateNewList(0), WithHashCRC64())
 		_, ok := h.Get("aln")
 		if ok {
 			t.Errorf("Get() should fail")
 		}
 	}
 	{
-		h := NewHashMap(CreateNewList(1), WithHashCRC64())
+		h := NewHashMap(list.CreateNewList(1), WithHashCRC64())
 		h.Set(tests[0].key, tests[0].val)
 		_, ok := h.Get("wrong key")
 		if ok {
@@ -61,7 +64,7 @@ func TestHashMapSlice(t *testing.T) {
 		{key: "f", val: "want f", want: "want f"},
 	}
 	{
-		h := NewHashMap(NewSlice(3), WithHashCRC32())
+		h := NewHashMap(slice.NewSlice(3), WithHashCRC32())
 		for _, tc := range tests {
 			h.Set(tc.key, tc.val)
 			v, ok := h.Get(tc.key)
@@ -74,14 +77,14 @@ func TestHashMapSlice(t *testing.T) {
 		}
 	}
 	{
-		h := NewHashMap(NewSlice(0), WithHashCRC64())
+		h := NewHashMap(slice.NewSlice(0), WithHashCRC64())
 		_, ok := h.Get("aln")
 		if ok {
 			t.Errorf("Get() should fail")
 		}
 	}
 	{
-		h := NewHashMap(NewSlice(1), WithHashCRC64())
+		h := NewHashMap(slice.NewSlice(1), WithHashCRC64())
 		h.Set(tests[0].key, tests[0].val)
 		_, ok := h.Get("wrong key")
 		if ok {

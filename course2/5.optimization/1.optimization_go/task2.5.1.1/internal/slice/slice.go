@@ -1,37 +1,39 @@
-package internal
+package slice
 
 import (
 	"hash"
+
+	"hashMap/internal"
 )
 
 type HashMapSlice struct {
 	hasher hash.Hash
-	data   []*Data
+	data   []*internal.Data
 	length int
 }
 
 type Slice struct {
-	data []*Data
+	data []*internal.Data
 	len  int
 	cap  int
 }
 
-func (s *Slice) length() int {
+func (s *Slice) Length() int {
 	return s.len
 }
 
-func (s *Slice) capacity() int {
+func (s *Slice) Capacity() int {
 	return s.cap
 }
 
-func (s *Slice) rehash(hasher *hash.Hash) Container {
-	if s.capacity() == 0 {
-		return &Slice{make([]*Data, 3), 0, 3}
+func (s *Slice) Rehash(hasher *hash.Hash) internal.Container {
+	if s.Capacity() == 0 {
+		return &Slice{make([]*internal.Data, 3), 0, 3}
 	}
-	data := make([]*Data, 2*s.capacity())
+	data := make([]*internal.Data, 2*s.Capacity())
 	for _, d := range s.data {
 		if d != nil {
-			hashVal := Hash(d.key, hasher)
+			hashVal := internal.Hash(d.Key, hasher)
 			hashVal %= len(data)
 			for hashVal < len(data) && data[hashVal] != nil {
 				hashVal++
@@ -42,18 +44,18 @@ func (s *Slice) rehash(hasher *hash.Hash) Container {
 			data[hashVal] = d
 		}
 	}
-	s.cap = 2 * s.capacity()
+	s.cap = 2 * s.Capacity()
 	s.data = data
 	return s
 }
 
 func (s *Slice) Set(key string, value any, hasher *hash.Hash) {
-	hashVal := Hash(key, hasher)
-	hashVal %= s.capacity()
+	hashVal := internal.Hash(key, hasher)
+	hashVal %= s.Capacity()
 
 	for hashVal < len(s.data) && s.data[hashVal] != nil {
-		if s.data[hashVal].key == key {
-			s.data[hashVal].value = value
+		if s.data[hashVal].Key == key {
+			s.data[hashVal].Value = value
 			return
 		}
 		hashVal++
@@ -61,19 +63,19 @@ func (s *Slice) Set(key string, value any, hasher *hash.Hash) {
 			hashVal = 0
 		}
 	}
-	s.data[hashVal] = &Data{key: key, value: value}
+	s.data[hashVal] = &internal.Data{Key: key, Value: value}
 	s.len++
 }
 
 func (s *Slice) Get(key string, hasher *hash.Hash) (any, bool) {
-	if s.length() == 0 {
+	if s.Length() == 0 {
 		return nil, false
 	}
-	hashVal := Hash(key, hasher)
-	hashVal %= s.capacity()
+	hashVal := internal.Hash(key, hasher)
+	hashVal %= s.Capacity()
 	for hashVal < len(s.data) && s.data[hashVal] != nil {
-		if s.data[hashVal].key == key {
-			return s.data[hashVal].value, true
+		if s.data[hashVal].Key == key {
+			return s.data[hashVal].Value, true
 		}
 		hashVal++
 		if hashVal == len(s.data) {
@@ -85,7 +87,7 @@ func (s *Slice) Get(key string, hasher *hash.Hash) (any, bool) {
 
 func NewSlice(len int) *Slice {
 	return &Slice{
-		data: make([]*Data, len),
+		data: make([]*internal.Data, len),
 		len:  0,
 		cap:  len,
 	}
