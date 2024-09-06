@@ -1,0 +1,34 @@
+syntax="proto3";
+
+package gRPCGeo;
+
+option go_package = "/go;grpcservice";
+
+service GeoService{
+  rpc SearchAnswer(RequestAddressGeocode) returns (ResponseAddress) {}
+  rpc GeocodeAnswer(Address) returns (ResponseAddressGeocode) {}
+}
+
+message RequestAddressGeocode {
+    double Lat = 1;
+    double Lng = 2;
+}
+
+message ResponseAddress {
+    Address Address = 1;
+}
+
+message Address {
+    string Road         = 1;
+    string Town         = 2;
+    string County       = 3;
+    string State        = 4;
+    string Postcode     = 5;
+    string Country      = 6;
+    string  CountryCode = 7;
+}
+
+message ResponseAddressGeocode {
+    string Lat = 1;
+    string Lon = 2;
+}
