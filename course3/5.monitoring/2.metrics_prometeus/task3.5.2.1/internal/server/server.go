@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"metrics/internal/controller"
+	"metrics/internal/metrics"
 	"metrics/internal/repository"
 	"metrics/internal/service"
 )
@@ -45,7 +46,7 @@ func NewServer() (*http.Server, error) {
 	})
 
 	userProxy := service.NewUserServiceProxy(userService, redisClient)
-	geoService := service.NewGeodataService()
+	geoService := service.NewGeodataService(metrics.NewProxyMetrics())
 	geoProxy := service.NewGeodataServiceProxy(geoService, redisClient)
 	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	responder := controller.NewResponder(logger)

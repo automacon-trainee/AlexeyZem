@@ -21,8 +21,19 @@ type GeodataService interface {
 	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
 	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
 }
+
+type Metrics interface {
+	NewDurationHistogram(string, string, []float64) prometheus.Histogram
+}
+
 type GeodataServiceImpl struct {
-	metrics *metrics.ProxyMetrics
+	metrics Metrics
+}
+
+func NewGeodataService(metr Metrics) GeodataService {
+	return &GeodataServiceImpl{
+		metrics: metr,
+	}
 }
 
 func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
@@ -68,12 +79,6 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress) (models.Res
 		return models.ResponseAddressGeocode{}, err
 	}
 	return coord[0], nil
-}
-
-func NewGeodataService() GeodataService {
-	return &GeodataServiceImpl{
-		metrics: metrics.NewProxyMetrics(),
-	}
 }
 
 type GeodataServiceProxy struct {

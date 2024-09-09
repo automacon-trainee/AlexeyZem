@@ -17,8 +17,14 @@ import (
 
 	"metrics/internal/metrics"
 	"metrics/internal/models"
-	"metrics/internal/repository"
 )
+
+type UserRepository interface {
+	Create(ctx context.Context, user models.User) error
+	GetByID(ctx context.Context, id string) (models.User, error)
+	GetByEmail(ctx context.Context, email string) (models.User, error)
+	List(ctx context.Context) ([]models.User, error)
+}
 
 type UserService interface {
 	CreateUser(user models.User) error
@@ -28,7 +34,7 @@ type UserService interface {
 }
 
 type UserServiceImpl struct {
-	repo  repository.UserRepository
+	repo  UserRepository
 	token *jwtauth.JWTAuth
 }
 
@@ -68,7 +74,7 @@ func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
 	return s.repo.GetByEmail(context.Background(), email)
 }
 
-func NewUserServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth) UserService {
+func NewUserServiceImpl(repo UserRepository, token *jwtauth.JWTAuth) UserService {
 	return &UserServiceImpl{
 		repo:  repo,
 		token: token,
