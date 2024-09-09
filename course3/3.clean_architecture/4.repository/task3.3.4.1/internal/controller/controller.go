@@ -9,20 +9,19 @@ import (
 
 	"projectrepo/internal"
 	"projectrepo/internal/models"
-	"projectrepo/internal/service"
 )
 
-type Controller interface {
-	SearchUser(w http.ResponseWriter, r *http.Request)
-	AllUser(w http.ResponseWriter, r *http.Request)
-	DeleteUser(w http.ResponseWriter, r *http.Request)
-	UpdateUser(w http.ResponseWriter, r *http.Request)
-	Create(w http.ResponseWriter, r *http.Request)
+type UserService interface {
+	Create(user *models.User) (err error)
+	Delete(username string) (err error)
+	Get(username string) (user *models.User, err error)
+	GetAll(limit, offset string) (users []*models.User, err error)
+	Update(username string, user *models.User) (err error)
 }
 
 type ImplController struct {
 	responder Responder
-	service   service.UserService
+	service   UserService
 }
 
 func (c *ImplController) SearchUser(w http.ResponseWriter, r *http.Request) {
@@ -94,7 +93,7 @@ func (c *ImplController) checkError(w http.ResponseWriter, err error) {
 	}
 }
 
-func NewController(responder Responder, serv service.UserService) Controller {
+func NewController(responder Responder, serv UserService) *ImplController {
 	return &ImplController{
 		responder: responder,
 		service:   serv,

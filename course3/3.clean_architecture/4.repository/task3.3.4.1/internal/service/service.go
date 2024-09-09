@@ -7,20 +7,26 @@ import (
 	"time"
 
 	"projectrepo/internal"
+	"projectrepo/internal/controller"
 	"projectrepo/internal/models"
-	"projectrepo/repository"
 )
 
-type UserService interface {
-	Create(user *models.User) (err error)
-	Delete(username string) (err error)
-	Get(username string) (user *models.User, err error)
-	GetAll(limit, offset string) (users []*models.User, err error)
-	Update(username string, user *models.User) (err error)
+type Conditions struct {
+	Limit  int
+	Offset int
+}
+
+type UserRepository interface {
+	Create(ctx context.Context, user *models.User) error
+	Update(ctx context.Context, user *models.User, username string) error
+	GetByUsername(ctx context.Context, username string) (*models.User, error)
+	Delete(ctx context.Context, username string) error
+	List(ctx context.Context, c Conditions) ([]*models.User, error)
+	CreateNewTable() error
 }
 
 type ImplService struct {
-	repo repository.UserRepository
+	repo UserRepository
 }
 
 func (i *ImplService) Create(user *models.User) (err error) {
@@ -40,11 +46,11 @@ func (i *ImplService) Delete(username string) (err error) {
 func (i *ImplService) Get(username string) (user *models.User, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	userRepo, err := i.repo.GetByUsername(ctx, username)
+	user, err = i.repo.GetByUsername(ctx, username)
 	if err != nil {
 		return nil, err
 	}
-	return userRepo.ToModelsUser(), nil
+	return
 }
 
 func (i *ImplService) GetAll(limit, offset string) (users []*models.User, err error) {
@@ -64,7 +70,7 @@ func (i *ImplService) GetAll(limit, offset string) (users []*models.User, err er
 	if err != nil {
 		return nil, fmt.Errorf("%w:%w", err, internal.BadRequestError)
 	}
-	users, err = i.repo.List(ctx, repository.Conditions{Limit: lim, Offset: off})
+	users, err = i.repo.List(ctx, Conditions{Limit: lim, Offset: off})
 	return
 }
 
@@ -75,6 +81,6 @@ func (i *ImplService) Update(username string, user *models.User) (err error) {
 	return
 }
 
-func NewService(repo repository.UserRepository) UserService {
+func NewService(repo UserRepository) controller.UserService {
 	return &ImplService{repo: repo}
 }

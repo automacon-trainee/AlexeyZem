@@ -8,27 +8,21 @@ import (
 
 	"projectrepo/internal"
 	"projectrepo/internal/models"
+	"projectrepo/internal/service"
 )
 
-type Conditions struct {
-	Limit  int
-	Offset int
-}
-
-type UserRepository interface {
-	Create(ctx context.Context, user *models.User) error
-	Update(ctx context.Context, user *models.User, username string) error
-	GetByUsername(ctx context.Context, username string) (*User, error)
-	Delete(ctx context.Context, username string) error
-	List(ctx context.Context, c Conditions) ([]*models.User, error)
-	CreateNewTable() error
+type DB interface {
+	BeginTx(context.Context, *sql.TxOptions) (*sql.Tx, error)
+	QueryContext(context.Context, string, ...interface{}) (*sql.Rows, error)
+	ExecContext(context.Context, string, ...interface{}) (sql.Result, error)
+	Exec(string, ...interface{}) (sql.Result, error)
 }
 
 type UserRepositoryImplSQL struct {
-	db *sql.DB
+	db DB
 }
 
-func NewUserRepository(db *sql.DB) UserRepository {
+func NewUserRepository(db DB) service.UserRepository {
 	return &UserRepositoryImplSQL{
 		db: db,
 	}
@@ -70,7 +64,7 @@ func (u *UserRepositoryImplSQL) Update(ctx context.Context, user *models.User, u
 	return u.updateUser(ctx, user, username)
 }
 
-func (u *UserRepositoryImplSQL) GetByUsername(ctx context.Context, username string) (*User, error) {
+func (u *UserRepositoryImplSQL) GetByUsername(ctx context.Context, username string) (*models.User, error) {
 	query := `SELECT * FROM users WHERE username = $1`
 	rows, err := u.db.QueryContext(ctx, query, username)
 	if err != nil {
@@ -85,7 +79,8 @@ func (u *UserRepositoryImplSQL) GetByUsername(ctx context.Context, username stri
 	if !user.IsExist {
 		return nil, internal.DeletedError
 	}
-	return &user, err
+	res := user.ToModelsUser()
+	return res, err
 }
 
 func (u *UserRepositoryImplSQL) Delete(ctx context.Context, username string) error {
@@ -105,7 +100,7 @@ func (u *UserRepositoryImplSQL) Delete(ctx context.Context, username string) err
 	return err
 }
 
-func (u *UserRepositoryImplSQL) List(ctx context.Context, c Conditions) ([]*models.User, error) {
+func (u *UserRepositoryImplSQL) List(ctx context.Context, c service.Conditions) ([]*models.User, error) {
 	query := `SELECT * FROM users limit $1 offset $2`
 	rows, err := u.db.QueryContext(ctx, query, c.Limit, c.Offset)
 	if err != nil {

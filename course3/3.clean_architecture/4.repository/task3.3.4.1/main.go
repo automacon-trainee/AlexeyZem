@@ -1,8 +1,8 @@
 // Разработай  веб-приложение  в  котором  реализован  слой  репозитория  с  использованием  PostgreSQL,
 // следуя принципам чистой архитектуры, и объединить все в Docker-compose.
 // Конфигурация базы данных должна обрабатываться с помощью godotenv.
-// Все  компоненты  приложения,  включая  базу  данных,  следует  инкапсулировать  в
-//  Docker-контейнерах  и
+// Все  компоненты  приложения, включая  базу  данных,  следует  инкапсулировать  в
+//  Docker-контейнерах и
 // управлять ими с помощью Docker-compose
 
 package main
@@ -23,8 +23,8 @@ import (
 	_ "github.com/lib/pq"
 
 	"projectrepo/internal/controller"
+	"projectrepo/internal/repository"
 	"projectrepo/internal/service"
-	"projectrepo/repository"
 )
 
 func main() {
