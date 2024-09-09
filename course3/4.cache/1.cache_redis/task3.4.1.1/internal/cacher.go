@@ -1,36 +1,41 @@
 package internal
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-redis/redis"
+
+	"redis/entities"
 )
 
 const expiration = time.Minute * 30
 
-type Cacher interface {
-	Set(key string, value any) error
-	Get(key string) (any, error)
+type CacherClient interface {
+	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
+	Get(key string) *redis.StringCmd
 }
 
 type CacherRedis struct {
-	client *redis.Client
+	client CacherClient
 }
 
-func NewCacherRedis(client *redis.Client) *CacherRedis {
+func NewCacherRedis(client CacherClient) *CacherRedis {
 	return &CacherRedis{client: client}
 }
 
-func (c *CacherRedis) Set(key string, value any) error {
-	return c.client.Set(key, value, expiration).Err()
+func (c *CacherRedis) Set(key string, value *entities.User) error {
+	return c.client.Set(key, *value, expiration).Err()
 }
 
-func (c *CacherRedis) Get(key string) (any, error) {
+func (c *CacherRedis) Get(key string) (entities.User, error) {
 	val, err := c.client.Get(key).Result()
 	if errors.Is(err, redis.Nil) {
-		return nil, fmt.Errorf(`not found by key "%s"`, key)
+		return entities.User{}, fmt.Errorf(`not found by key "%s"`, key)
 	}
-	return val, err
+	var res entities.User
+	err = json.Unmarshal([]byte(val), &res)
+	return res, err
 }

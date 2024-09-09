@@ -18,7 +18,7 @@ import (
 func main() {
 	client := redis.NewClient(&redis.Options{Addr: "127.0.0.1:6379"})
 	cache := internal.NewCacherRedis(client)
-	err := cache.Set("first", entities.User{ID: 1, Name: "John", Age: 20})
+	err := cache.Set("first", &entities.User{ID: 1, Name: "John", Age: 20})
 	if err != nil {
 		panic(err)
 	}
