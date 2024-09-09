@@ -15,17 +15,11 @@ import (
 
 	"github.com/go-redis/redis"
 
+	"metrics/internal/controller"
 	"metrics/internal/metrics"
 	"metrics/internal/models"
 	"metrics/internal/repository"
 )
-
-type UserService interface {
-	CreateUser(user models.User) error
-	AuthUser(user models.User) (string, error)
-	GetUserByEmail(email string) (models.User, error)
-	GetAllUsers() ([]models.User, error)
-}
 
 type UserServiceImpl struct {
 	repo  repository.UserRepository
@@ -67,7 +61,7 @@ func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
 	return s.repo.GetByEmail(context.Background(), email)
 }
 
-func NewUserServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth) UserService {
+func NewUserServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth) *UserServiceImpl {
 	return &UserServiceImpl{
 		repo:  repo,
 		token: token,
@@ -75,7 +69,7 @@ func NewUserServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth) 
 }
 
 type UserServiceProxy struct {
-	userService UserService
+	userService controller.UserService
 	client      *redis.Client
 	metrics     *metrics.ProxyMetrics
 }
@@ -136,7 +130,7 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 	return user, err
 }
 
-func NewUserServiceProxy(userService UserService, client *redis.Client) UserService {
+func NewUserServiceProxy(userService controller.UserService, client *redis.Client) *UserServiceProxy {
 	return &UserServiceProxy{
 		userService: userService,
 		client:      client,

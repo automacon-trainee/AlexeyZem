@@ -10,26 +10,28 @@ import (
 
 	"metrics/internal/metrics"
 	"metrics/internal/models"
-	"metrics/internal/service"
 )
 
-type Controller interface {
-	Register(w http.ResponseWriter, r *http.Request)
-	Auth(w http.ResponseWriter, r *http.Request)
-	Search(w http.ResponseWriter, r *http.Request)
-	Geocode(w http.ResponseWriter, r *http.Request)
-	GetByEmail(w http.ResponseWriter, r *http.Request)
-	GetAllUsers(w http.ResponseWriter, r *http.Request)
+type GeodataServiceRPC interface {
+	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
+	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
+}
+
+type UserService interface {
+	CreateUser(user models.User) error
+	AuthUser(user models.User) (string, error)
+	GetUserByEmail(email string) (models.User, error)
+	GetAllUsers() ([]models.User, error)
 }
 
 type GeoController struct {
 	responder   Responder
-	serviceGeo  service.GeodataServiceRPC
-	serviceUser service.UserService
+	serviceGeo  GeodataServiceRPC
+	serviceUser UserService
 	metrics     *metrics.ProxyMetrics
 }
 
-func NewGeoController(responder Responder, servUser service.UserService, servGeo service.GeodataServiceRPC) *GeoController {
+func NewGeoController(responder Responder, servUser UserService, servGeo GeodataServiceRPC) *GeoController {
 	return &GeoController{
 		responder:   responder,
 		serviceGeo:  servGeo,

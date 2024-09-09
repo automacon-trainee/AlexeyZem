@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net"
 	"net/rpc"
@@ -9,9 +10,56 @@ import (
 
 	"github.com/go-redis/redis"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
 
+	pb "metrics/cmd/gRPCGeo"
+	"metrics/internal/models"
 	"metrics/internal/service"
 )
+
+type GeoServiceServer struct {
+	pb.UnimplementedGeoServiceServer
+	geoServer service.GeodataService
+}
+
+func (g *GeoServiceServer) SearchAnswer(_ context.Context, geocode *pb.RequestAddressGeocode) (*pb.ResponseAddress, error) {
+	reqAddr := models.RequestAddressGeocode{Lat: geocode.Lat, Lng: geocode.Lng}
+	res := models.ResponseAddress{}
+	err := g.geoServer.Search(reqAddr, &res)
+	response := pb.ResponseAddress{
+		Address: &pb.Address{
+			Country:     res.Address.Country,
+			Road:        res.Address.Road,
+			County:      res.Address.County,
+			Town:        res.Address.Town,
+			State:       res.Address.State,
+			Postcode:    res.Address.Postcode,
+			CountryCode: res.Address.CountryCode,
+		},
+	}
+	return &response, err
+}
+
+func (g *GeoServiceServer) GeocodeAnswer(_ context.Context, address *pb.Address) (*pb.ResponseAddressGeocode, error) {
+	reqAddress := models.ResponseAddress{
+		Address: models.Address{
+			Country:     address.Country,
+			Road:        address.Road,
+			County:      address.County,
+			Town:        address.Town,
+			State:       address.State,
+			Postcode:    address.Postcode,
+			CountryCode: address.CountryCode,
+		},
+	}
+	res := models.ResponseAddressGeocode{}
+	err := g.geoServer.Geocode(reqAddress, &res)
+	response := pb.ResponseAddressGeocode{
+		Lat: res.Lat,
+		Lon: res.Lon,
+	}
+	return &response, err
+}
 
 func main() {
 	err := godotenv.Load()
@@ -37,7 +85,8 @@ func main() {
 		startRPC(l)
 	case "json-rpc":
 		startJSONRPC(l)
-
+	case "gRPC":
+		startGRPC(l, geoProxy)
 	}
 }
 
@@ -53,5 +102,16 @@ func startJSONRPC(l net.Listener) {
 			log.Println(err)
 		}
 		go jsonrpc.ServeConn(conn)
+	}
+}
+
+func startGRPC(l net.Listener, geoProxy service.GeodataService) {
+	server := grpc.NewServer()
+	pb.RegisterGeoServiceServer(server, &GeoServiceServer{
+		geoServer: geoProxy,
+	})
+	log.Println("Listening on :1234 with protocol gRPC")
+	if err := server.Serve(l); err != nil {
+		log.Fatal(err)
 	}
 }

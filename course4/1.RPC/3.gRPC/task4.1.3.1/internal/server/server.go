@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net/http"
 	"net/rpc"
@@ -12,7 +13,10 @@ import (
 	"github.com/go-chi/jwtauth"
 	"github.com/go-redis/redis"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
+	pb "metrics/cmd/gRPCGeo"
 	"metrics/internal/controller"
 	"metrics/internal/repository"
 	"metrics/internal/service"
@@ -47,22 +51,12 @@ func NewServer() (*http.Server, error) {
 	})
 
 	userProxy := service.NewUserServiceProxy(userService, redisClient)
-
-	clientRPC := &rpc.Client{}
 	protocol := os.Getenv("RPC_PROTOCOL")
-	switch protocol {
-	case "rpc":
-		clientRPC, err = rpc.Dial("tcp", "geoservice:1234")
-		if err != nil {
-			return nil, err
-		}
-	case "json-rpc":
-		clientRPC, err = jsonrpc.Dial("tcp", "geoservice:1234")
-		if err != nil {
-			return nil, err
-		}
+
+	geoProvider, err := GetGeoDataServiceRpc(protocol)
+	if err != nil {
+		return nil, err
 	}
-	geoProvider := service.NewGeoRPC(clientRPC)
 	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	responder := controller.NewResponder(logger)
 	controll := controller.NewGeoController(responder, userProxy, geoProvider)
@@ -74,4 +68,34 @@ func NewServer() (*http.Server, error) {
 		WriteTimeout: 10 * time.Second,
 	}
 	return &server, nil
+}
+
+func GetGeoDataServiceRpc(protocol string) (controller.GeodataServiceRPC, error) {
+	switch protocol {
+	case "rpc":
+		clientRPC, err := rpc.Dial("tcp", "geoservice:1234")
+		if err != nil {
+			return nil, err
+		} else {
+			return service.NewGeoRPC(clientRPC), nil
+		}
+	case "json-rpc":
+		clientRPC, err := jsonrpc.Dial("tcp", "geoservice:1234")
+		if err != nil {
+			return nil, err
+		} else {
+			return service.NewGeoRPC(clientRPC), nil
+		}
+	case "gRPC":
+		{
+			conn, err := grpc.NewClient("localhost:1234", grpc.WithTransportCredentials(insecure.NewCredentials()))
+			if err != nil {
+				return nil, err
+			}
+			grpcClient := pb.NewGeoServiceClient(conn)
+			return service.NewGeoGRPC(grpcClient), nil
+		}
+	default:
+		return nil, errors.New("invalid rpc protocol")
+	}
 }

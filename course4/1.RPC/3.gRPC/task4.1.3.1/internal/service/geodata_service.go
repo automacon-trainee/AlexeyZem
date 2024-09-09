@@ -21,6 +21,7 @@ type GeodataService interface {
 	Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error
 	Geocode(address models.ResponseAddress, res *models.ResponseAddressGeocode) error
 }
+
 type GeodataServiceImpl struct {
 	metrics *metrics.ProxyMetrics
 }
@@ -74,7 +75,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 	return nil
 }
 
-func NewGeodataService() GeodataService {
+func NewGeodataService() *GeodataServiceImpl {
 	return &GeodataServiceImpl{
 		metrics: metrics.NewProxyMetrics(),
 	}
@@ -141,7 +142,7 @@ func (g *GeodataServiceProxy) Geocode(arg models.ResponseAddress, res *models.Re
 	return err
 }
 
-func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) GeodataService {
+func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) *GeodataServiceProxy {
 	return &GeodataServiceProxy{
 		service: serv,
 		client:  client,

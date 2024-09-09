@@ -6,11 +6,6 @@ import (
 	"metrics/internal/models"
 )
 
-type GeodataServiceRPC interface {
-	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
-	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
-}
-
 type GeoRPC struct {
 	client *rpc.Client
 }
