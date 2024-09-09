@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -19,6 +20,10 @@ type SomeRepositoryImpl struct {
 	repo mockRepo // imitation repository
 }
 
+func NewSomeRepository() *SomeRepositoryImpl {
+	return &SomeRepositoryImpl{repo: make(map[string]string)}
+}
+
 func (s *SomeRepositoryImpl) GetData(key string) string {
 	val, ok := s.repo[key]
 	if ok {
@@ -31,13 +36,18 @@ func (s *SomeRepositoryImpl) SetData(key, val string) {
 	s.repo[key] = val
 }
 
-func NewSomeRepository() *SomeRepositoryImpl {
-	return &SomeRepositoryImpl{repo: make(map[string]string)}
+type CacherClient interface {
+	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
+	Get(key string) *redis.StringCmd
 }
 
 type SomeRepositoryProxyImpl struct {
 	someRepo SomeRepository
-	cache    *redis.Client
+	cache    CacherClient
+}
+
+func NewSomeRepositoryProxy(client CacherClient, origRepo SomeRepository) SomeRepository {
+	return &SomeRepositoryProxyImpl{someRepo: origRepo, cache: client}
 }
 
 func (s *SomeRepositoryProxyImpl) GetData(key string) string {
@@ -46,9 +56,9 @@ func (s *SomeRepositoryProxyImpl) GetData(key string) string {
 		val = s.someRepo.GetData(key)
 		s.cache.Set(key, val, expiration)
 	}
+	if err != nil {
+		log.Println(err)
+		return ""
+	}
 	return val
-}
-
-func NewSomeRepositoryProxy(client *redis.Client, origRepo SomeRepository) SomeRepository {
-	return &SomeRepositoryProxyImpl{someRepo: origRepo, cache: client}
 }

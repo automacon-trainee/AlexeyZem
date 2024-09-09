@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/go-redis/redis"
@@ -32,7 +33,8 @@ func TestSomeRepositoryProxyImpl(t *testing.T) {
 	repoImpl.SetData("some2", "value")
 	val = proxyRepo.GetData("some2")
 	if val != "value" {
-		t.Errorf("SomeRepositoryProxyImpl.GetData() should return 'value'")
+		fmt.Println(repoImpl.repo)
+		t.Errorf("SomeRepositoryProxyImpl.GetData() should return 'value', get:%s", val)
 	}
 	val = proxyRepo.GetData("some2")
 	if val != "value" {
