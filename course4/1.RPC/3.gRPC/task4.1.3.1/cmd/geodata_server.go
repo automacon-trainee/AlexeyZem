@@ -12,22 +12,22 @@ import (
 	"github.com/joho/godotenv"
 	"google.golang.org/grpc"
 
-	pb "metrics/cmd/gRPCGeo"
+	"metrics/internal/API/gRPCGeo"
 	"metrics/internal/models"
 	"metrics/internal/service"
 )
 
 type GeoServiceServer struct {
-	pb.UnimplementedGeoServiceServer
+	gRPCGeo.UnimplementedGeoServiceServer
 	geoServer service.GeodataService
 }
 
-func (g *GeoServiceServer) SearchAnswer(_ context.Context, geocode *pb.RequestAddressGeocode) (*pb.ResponseAddress, error) {
+func (g *GeoServiceServer) SearchAnswer(_ context.Context, geocode *gRPCGeo.RequestAddressGeocode) (*gRPCGeo.ResponseAddress, error) {
 	reqAddr := models.RequestAddressGeocode{Lat: geocode.Lat, Lng: geocode.Lng}
 	res := models.ResponseAddress{}
 	err := g.geoServer.Search(reqAddr, &res)
-	response := pb.ResponseAddress{
-		Address: &pb.Address{
+	response := gRPCGeo.ResponseAddress{
+		Address: &gRPCGeo.Address{
 			Country:     res.Address.Country,
 			Road:        res.Address.Road,
 			County:      res.Address.County,
@@ -40,7 +40,7 @@ func (g *GeoServiceServer) SearchAnswer(_ context.Context, geocode *pb.RequestAd
 	return &response, err
 }
 
-func (g *GeoServiceServer) GeocodeAnswer(_ context.Context, address *pb.Address) (*pb.ResponseAddressGeocode, error) {
+func (g *GeoServiceServer) GeocodeAnswer(_ context.Context, address *gRPCGeo.Address) (*gRPCGeo.ResponseAddressGeocode, error) {
 	reqAddress := models.ResponseAddress{
 		Address: models.Address{
 			Country:     address.Country,
@@ -54,7 +54,7 @@ func (g *GeoServiceServer) GeocodeAnswer(_ context.Context, address *pb.Address)
 	}
 	res := models.ResponseAddressGeocode{}
 	err := g.geoServer.Geocode(reqAddress, &res)
-	response := pb.ResponseAddressGeocode{
+	response := gRPCGeo.ResponseAddressGeocode{
 		Lat: res.Lat,
 		Lon: res.Lon,
 	}
@@ -67,7 +67,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: "redis:6379",
 	})
 	geoService := service.NewGeodataService()
 	geoProxy := service.NewGeodataServiceProxy(geoService, redisClient)
@@ -107,7 +107,7 @@ func startJSONRPC(l net.Listener) {
 
 func startGRPC(l net.Listener, geoProxy service.GeodataService) {
 	server := grpc.NewServer()
-	pb.RegisterGeoServiceServer(server, &GeoServiceServer{
+	gRPCGeo.RegisterGeoServiceServer(server, &GeoServiceServer{
 		geoServer: geoProxy,
 	})
 	log.Println("Listening on :1234 with protocol gRPC")

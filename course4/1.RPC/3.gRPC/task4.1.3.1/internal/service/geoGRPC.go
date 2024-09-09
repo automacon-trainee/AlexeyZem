@@ -3,22 +3,22 @@ package service
 import (
 	"context"
 
-	pb "metrics/cmd/gRPCGeo"
+	"metrics/internal/API/gRPCGeo"
 	"metrics/internal/models"
 )
 
 type GeoGRPC struct {
-	client pb.GeoServiceClient
+	client gRPCGeo.GeoServiceClient
 }
 
-func NewGeoGRPC(client pb.GeoServiceClient) *GeoGRPC {
+func NewGeoGRPC(client gRPCGeo.GeoServiceClient) *GeoGRPC {
 	return &GeoGRPC{
 		client: client,
 	}
 }
 
 func (g *GeoGRPC) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
-	req := pb.RequestAddressGeocode{Lat: geocode.Lat, Lng: geocode.Lng}
+	req := gRPCGeo.RequestAddressGeocode{Lat: geocode.Lat, Lng: geocode.Lng}
 	resp, err := g.client.SearchAnswer(context.Background(), &req)
 	if err != nil {
 		return models.ResponseAddress{}, err
@@ -38,7 +38,7 @@ func (g *GeoGRPC) Search(geocode models.RequestAddressGeocode) (models.ResponseA
 }
 
 func (g *GeoGRPC) Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error) {
-	req := pb.Address{
+	req := gRPCGeo.Address{
 		Road:        address.Address.Road,
 		Town:        address.Address.Town,
 		County:      address.Address.County,

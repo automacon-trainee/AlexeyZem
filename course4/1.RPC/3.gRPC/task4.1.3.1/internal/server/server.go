@@ -16,7 +16,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	pb "metrics/cmd/gRPCGeo"
+	pb "metrics/internal/API/gRPCGeo"
 	"metrics/internal/controller"
 	"metrics/internal/repository"
 	"metrics/internal/service"
@@ -47,13 +47,13 @@ func NewServer() (*http.Server, error) {
 	token := jwtauth.New("HS256", []byte(secretKey), nil)
 	userService := service.NewUserServiceImpl(repo, token)
 	redisClient := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: "redis:6379",
 	})
 
 	userProxy := service.NewUserServiceProxy(userService, redisClient)
 	protocol := os.Getenv("RPC_PROTOCOL")
 
-	geoProvider, err := GetGeoDataServiceRpc(protocol)
+	geoProvider, err := GetGeoDataServiceRPC(protocol)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func NewServer() (*http.Server, error) {
 	return &server, nil
 }
 
-func GetGeoDataServiceRpc(protocol string) (controller.GeodataServiceRPC, error) {
+func GetGeoDataServiceRPC(protocol string) (controller.GeodataServiceRPC, error) {
 	switch protocol {
 	case "rpc":
 		clientRPC, err := rpc.Dial("tcp", "geoservice:1234")
@@ -87,14 +87,12 @@ func GetGeoDataServiceRpc(protocol string) (controller.GeodataServiceRPC, error)
 			return service.NewGeoRPC(clientRPC), nil
 		}
 	case "gRPC":
-		{
-			conn, err := grpc.NewClient("localhost:1234", grpc.WithTransportCredentials(insecure.NewCredentials()))
-			if err != nil {
-				return nil, err
-			}
-			grpcClient := pb.NewGeoServiceClient(conn)
-			return service.NewGeoGRPC(grpcClient), nil
+		conn, err := grpc.NewClient("geoservice:1234", grpc.WithTransportCredentials(insecure.NewCredentials()))
+		if err != nil {
+			return nil, err
 		}
+		grpcClient := pb.NewGeoServiceClient(conn)
+		return service.NewGeoGRPC(grpcClient), nil
 	default:
 		return nil, errors.New("invalid rpc protocol")
 	}
