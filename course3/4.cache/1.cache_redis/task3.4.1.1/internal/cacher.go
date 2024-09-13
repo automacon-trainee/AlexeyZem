@@ -13,6 +13,8 @@ import (
 
 const expiration = time.Minute * 30
 
+//go:generate mockgen -destination=mock.go -source=$GOFILE -package=$GOPACKAGE
+
 type CacherClient interface {
 	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
 	Get(key string) *redis.StringCmd
