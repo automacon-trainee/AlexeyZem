@@ -3,6 +3,7 @@ package broker_server
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"time"
 
@@ -11,9 +12,25 @@ import (
 	"metrics/internal/API/gRPCNotify"
 )
 
+func initTopic(topic string, partition int) {
+	err := errors.New("topic not init")
+	for err != nil {
+		var conn *kafka.Conn
+		conn, err = kafka.DialLeader(context.Background(), "tcp", "kafka1:9092", topic, partition)
+		log.Println(err)
+		if err == nil {
+			conn.Close()
+		}
+		time.Sleep(1 * time.Second)
+	}
+}
+
 func StartKafka(NotifyCl gRPCNotify.NotifyServiceClient) {
 	topic := "my_topic"
 	partition := 0
+
+	initTopic(topic, partition)
+
 	config := kafka.ReaderConfig{
 		Brokers:   []string{"kafka1:9092"},
 		Topic:     topic,

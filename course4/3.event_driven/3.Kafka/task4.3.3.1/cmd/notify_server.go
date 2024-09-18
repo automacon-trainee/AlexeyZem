@@ -36,7 +36,7 @@ func main() {
 	}
 	broker := os.Getenv("BROKER")
 	notifyServer := NewNotifyServ()
-
+	go startGRPC(notifyServer)
 	cl := GetNotifyGRPCClient()
 	switch broker {
 	case "kafka":
@@ -47,7 +47,6 @@ func main() {
 		log.Println("Unknown broker " + broker)
 	}
 	log.Println("Broker start sucessful")
-	startGRPC(notifyServer)
 }
 
 func GetNotifyGRPCClient() gRPCNotify.NotifyServiceClient {
