@@ -1,9 +1,5 @@
 package internal
 
-import (
-	"time"
-)
-
 type CandlesHistory struct {
 	Candles []Candle `json:"candles"`
 }
@@ -54,13 +50,4 @@ type Pair struct {
 	Quantity string `json:"quantity"`
 	Amount   string `json:"amount"`
 	Date     int64  `json:"date"`
-}
-
-type Exchanger interface {
-	GetTicker() (Ticker, error)
-	GetTrades(pairs ...string) (Trades, error)
-	GetOrderBook(limit int, pairs ...string) (OrderBook, error)
-	GetCurrencies() (Currencies, error)
-	GetCandlesHistory(pair string, limit int, start, end time.Time) (CandlesHistory, error)
-	GetClosePrice(pair string, limit int, start, end time.Time) ([]float64, error)
 }

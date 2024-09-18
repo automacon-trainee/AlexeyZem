@@ -4,15 +4,6 @@ import (
 	"github.com/cinar/indicator"
 )
 
-type TechnicalAnalysis interface {
-	StochPrice() ([]float64, []float64)
-	RSI(period int) ([]float64, []float64)
-	StochRSI(period int) ([]float64, []float64)
-	SMA(period int) []float64
-	MACD() ([]float64, []float64)
-	EMA() []float64
-}
-
 type Lines struct {
 	high    []float64
 	low     []float64
@@ -42,8 +33,7 @@ func (t *Lines) MACD() (_, _ []float64) {
 	return indicator.Macd(t.closing)
 }
 
-func (t *Lines) EMA() []float64 {
-	period := 5
+func (t *Lines) EMA(period int) []float64 {
 	return indicator.Ema(period, t.closing)
 }
 

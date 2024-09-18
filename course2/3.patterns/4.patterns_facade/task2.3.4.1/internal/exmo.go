@@ -17,6 +17,15 @@ const (
 	candlesHistory = "/candles_history"
 )
 
+type Exchanger interface {
+	GetTicker() (Ticker, error)
+	GetTrades(pairs ...string) (Trades, error)
+	GetOrderBook(limit int, pairs ...string) (OrderBook, error)
+	GetCurrencies() (Currencies, error)
+	GetCandlesHistory(pair string, limit int, start, end time.Time) (CandlesHistory, error)
+	GetClosePrice(pair string, limit int, start, end time.Time) ([]float64, error)
+}
+
 type Exmo struct {
 	client *http.Client
 	url    string
