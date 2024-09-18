@@ -12,5 +12,9 @@ proto_gen:
 tests:
 	go test ./... -v
 
+# start project in docker
 up:
 	docker-compose up --build
+
+clear:
+	docker image prune -f | docker volume prune -f | docker container prune -f
