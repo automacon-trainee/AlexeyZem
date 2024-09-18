@@ -1,0 +1,20 @@
+syntax="proto3";
+
+package gRPCAuth;
+
+option go_package = "metrics/gRPCAuth";
+
+service AuthService{
+  rpc VerifyToken(Token) returns (User) {}
+}
+
+message Token{
+  string token = 1;
+}
+
+message User{
+  string id = 1;
+  string username = 2;
+  string password = 3;
+  string email = 4;
+}

@@ -1,0 +1,97 @@
+package service
+
+import (
+	"context"
+	"encoding/json"
+	"errors"
+	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/go-redis/redis"
+
+	"metrics/internal/controller"
+	"metrics/internal/metrics"
+	"metrics/internal/models"
+	"metrics/internal/repository"
+)
+
+type UserServiceImpl struct {
+	repo repository.UserRepository
+}
+
+func (s *UserServiceImpl) GetAllUsers() ([]models.User, error) {
+	return s.repo.List(context.Background())
+}
+
+func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
+	return s.repo.GetByEmail(context.Background(), email)
+}
+
+func NewUserServiceImpl(repo repository.UserRepository) *UserServiceImpl {
+	return &UserServiceImpl{
+		repo: repo,
+	}
+}
+
+type UserServiceProxy struct {
+	userService controller.UserService
+	client      *redis.Client
+	metrics     *metrics.ProxyMetrics
+}
+
+func (s *UserServiceProxy) GetAllUsers() ([]models.User, error) {
+	histogram := s.metrics.NewDurationHistogram("GetAllUser_cache_histogram", "time for cache getAllUser",
+		prometheus.LinearBuckets(0.1, 0.1, 10))
+	start := time.Now()
+
+	data, err := s.client.Get("allUsers").Result()
+	if err != nil {
+		users, errBD := s.userService.GetAllUsers()
+		if errBD != nil {
+			return nil, errBD
+		}
+		if errors.Is(err, redis.Nil) {
+			s.client.Set("allUsers", users, time.Minute*5)
+		}
+		return users, nil
+	}
+
+	duration := time.Since(start).Seconds()
+	histogram.Observe(duration)
+	var users []models.User
+	err = json.Unmarshal([]byte(data), &users)
+	return users, err
+}
+
+func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
+	histogram := s.metrics.NewDurationHistogram("GetUserByEmail_endpoint_histogram", "time for cache getUserByEmail",
+		prometheus.LinearBuckets(0.1, 0.1, 10))
+	start := time.Now()
+
+	data, err := s.client.Get(email).Result()
+	if err != nil {
+		user, errBD := s.userService.GetUserByEmail(email)
+		if errBD != nil {
+			return models.User{}, err
+		}
+		if errors.Is(err, redis.Nil) {
+			s.client.Set(email, user, time.Hour)
+		}
+		return user, nil
+	}
+
+	duration := time.Since(start).Seconds()
+	histogram.Observe(duration)
+	user := models.User{}
+	err = json.Unmarshal([]byte(data), &user)
+	return user, err
+}
+
+func NewUserServiceProxy(userService controller.UserService, client *redis.Client) *UserServiceProxy {
+	return &UserServiceProxy{
+		userService: userService,
+		client:      client,
+		metrics:     metrics.NewProxyMetrics(),
+	}
+}
