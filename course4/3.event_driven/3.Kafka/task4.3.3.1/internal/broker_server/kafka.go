@@ -15,7 +15,7 @@ func StartKafka(NotifyCl gRPCNotify.NotifyServiceClient) {
 	topic := "my_topic"
 	partition := 0
 	config := kafka.ReaderConfig{
-		Brokers:   []string{"kafka:9092"},
+		Brokers:   []string{"kafka1:9092"},
 		Topic:     topic,
 		Partition: partition,
 		MinBytes:  10e3,

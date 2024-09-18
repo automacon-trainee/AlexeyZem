@@ -78,7 +78,7 @@ func GetKafkaWriter() *kafka.Writer {
 	topic := "my_topic"
 
 	writer := &kafka.Writer{
-		Addr:     kafka.TCP("kafka:9092"),
+		Addr:     kafka.TCP("kafka1:9092"),
 		Topic:    topic,
 		Balancer: &kafka.LeastBytes{},
 	}
