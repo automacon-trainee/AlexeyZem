@@ -10,7 +10,7 @@ import (
 )
 
 func GetBookProvider() gRPCBook.BookServiceClient {
-	conn, err := grpc.NewClient("book:1235", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("library:1235", grpc.WithTransportCredentials(insecure.NewCredentials()))
 
 	if err != nil {
 		log.Fatal(err)

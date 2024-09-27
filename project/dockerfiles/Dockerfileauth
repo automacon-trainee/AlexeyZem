@@ -1,0 +1,21 @@
+FROM golang:alpine AS build
+
+WORKDIR /auth
+
+COPY . .
+
+RUN go mod download
+
+RUN go build cmd/auth/main.go
+
+FROM alpine:latest
+
+WORKDIR /auth
+
+EXPOSE 1000
+
+COPY .env .
+
+COPY --from=build auth/main auth/main
+
+CMD ["./auth/main"]

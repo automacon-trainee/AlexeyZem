@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	_ "github.com/lib/pq"
+
 	"project/internal/library/models"
 	"project/internal/myerror"
 )
@@ -105,10 +107,10 @@ func (p *PostgresDB) GetByID(ctx context.Context, id int) (models.Book, error) {
 	}
 
 	if book.Count == 0 {
-		return models.Book{},myerror.ErrNotBook
+		return models.Book{}, myerror.ErrNotBook
 	}
 
-	return book,nil
+	return book, nil
 }
 
 func (p *PostgresDB) CreateNewBookTable(ctx context.Context) error {

@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 
+	_ "github.com/lib/pq"
+
 	"project/internal/myerror"
 	"project/internal/profile/models"
 )
@@ -94,7 +96,7 @@ func (p *PostgresDB) CreateTableProfile(ctx context.Context) error {
 	str := `CREATE TABLE IF NOT EXISTS profile (
     id SERIAL PRIMARY KEY,
     name TEXT,
-    lastname TEXT,
+    lastname TEXT
 )`
 	_, err := p.db.ExecContext(ctx, str)
 	if err != nil {

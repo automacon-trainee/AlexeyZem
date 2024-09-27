@@ -1,0 +1,21 @@
+FROM golang:alpine AS build
+
+WORKDIR /library
+
+COPY . .
+
+RUN go mod download
+
+RUN go build cmd/library/main.go
+
+FROM alpine:latest
+
+WORKDIR /library
+
+EXPOSE 3000
+
+COPY .env .
+
+COPY --from=build library/main library/main
+
+CMD ["./library/main"]

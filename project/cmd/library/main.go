@@ -117,7 +117,7 @@ func main() {
 	router := controller.NewRouter(contr, provider.GetAuthProvider())
 
 	server := http.Server{
-		Addr:         "1001",
+		Addr:         ":3000",
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,

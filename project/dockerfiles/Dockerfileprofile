@@ -1,0 +1,21 @@
+FROM golang:alpine AS build
+
+WORKDIR /profile
+
+COPY . .
+
+RUN go mod download
+
+RUN go build cmd/profile/main.go
+
+FROM alpine:latest
+
+WORKDIR /profile
+
+EXPOSE 2000
+
+COPY .env .
+
+COPY --from=build profile/main profile/main
+
+CMD ["./profile/main"]

@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-	
+
 	"project/internal/API/gRPCProfile"
 	"project/internal/profile/controller"
 	"project/internal/profile/models"
@@ -85,7 +85,7 @@ func main() {
 	router := controller.NewProfileRouter(contr, provider.GetAuthProvider())
 
 	server := http.Server{
-		Addr:         "1001",
+		Addr:         ":2000",
 		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
@@ -105,7 +105,7 @@ func StartGRPC(profile controller.ProfileService) {
 	gRPCProfile.RegisterProfileServiceServer(server, &ProfileGRPC{
 		profile: profile,
 	})
-	log.Println("Listening on :1235 with protocol gRPC")
+	log.Println("Listening on :1236 with protocol gRPC")
 	if err := server.Serve(l); err != nil {
 		log.Fatal(err)
 	}
