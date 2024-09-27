@@ -70,7 +70,7 @@ func (p *PostgresDB) TakeBook(ctx context.Context, id int) (models.Book, error) 
 	}
 
 	str = `UPDATE book SET count = count - 1 WHERE id = $1`
-	_, err := p.db.ExecContext(ctx, str)
+	_, err := p.db.ExecContext(ctx, str, id)
 	if err != nil {
 		return models.Book{}, err
 	}

@@ -59,7 +59,7 @@ func (i *Impl) GetProfile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *Impl) TakeBook(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userId")
+	userID := chi.URLParam(r, "id")
 	uID, err := strconv.Atoi(userID)
 	if err != nil {
 		i.responder.ErrorBadRequest(w, err)
@@ -82,7 +82,7 @@ func (i *Impl) TakeBook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (i *Impl) ReturnBook(w http.ResponseWriter, r *http.Request) {
-	userID := chi.URLParam(r, "userId")
+	userID := chi.URLParam(r, "id")
 	uID, err := strconv.Atoi(userID)
 	if err != nil {
 		i.responder.ErrorBadRequest(w, err)

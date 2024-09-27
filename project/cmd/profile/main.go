@@ -78,6 +78,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	err = repo.CreateProfileBookTable(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	serv := service.NewProfileServiceImpl(repo, provider.GetBookProvider())
 	logger := logrus.New()
 	resp := responder.NewResponder(logger)
