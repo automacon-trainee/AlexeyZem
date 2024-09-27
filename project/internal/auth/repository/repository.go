@@ -33,7 +33,7 @@ func (db *PostgressDataBase) CreateNewUserTable(ctx context.Context) error {
 	return err
 }
 
-func (db *PostgressDataBase) Create(ctx context.Context, user models.User) error {
+func (db *PostgressDataBase) Create(ctx context.Context, user *models.User) error {
 	query := `
         INSERT INTO users (username, password, email)
         VALUES ($1, $2, $3)

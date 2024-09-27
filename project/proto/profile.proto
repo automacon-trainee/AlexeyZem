@@ -1,0 +1,17 @@
+syntax="proto3";
+
+package gRPCProfile;
+
+option go_package = "project/gRPCProfile";
+
+service ProfileService{
+  rpc Create(Profile) returns (Null) {}
+}
+
+message Profile {
+  int64 id = 1;
+  string name = 2;
+  string lastName = 3;
+}
+
+message Null {}

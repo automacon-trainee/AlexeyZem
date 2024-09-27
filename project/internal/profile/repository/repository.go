@@ -56,13 +56,12 @@ func (p *PostgresDB) GetProfile(ctx context.Context, id int) (*models.Profile, [
 
 	var booksID []int
 	for rows.Next() {
-		var bookId int
-		if err := rows.Scan(&bookId); err != nil {
+		var bookID int
+		if err := rows.Scan(&bookID); err != nil {
 			return nil, nil, err
 		}
 
-		booksID = append(booksID, bookId)
-
+		booksID = append(booksID, bookID)
 	}
 
 	return &profile, booksID, nil

@@ -2,6 +2,12 @@ package controller
 
 import (
 	"net/http"
+
+	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
+
+	"project/internal/API/gRPCAuth"
+	mymiddleware "project/internal/middleware"
 )
 
 type ProfileController interface {
@@ -10,12 +16,15 @@ type ProfileController interface {
 	ReturnBook(w http.ResponseWriter, r *http.Request)
 }
 
-type ProfileRouter struct {
-	controller ProfileController
-}
+func NewProfileRouter(controller ProfileController, auth gRPCAuth.AuthServiceClient) *chi.Mux {
+	r := chi.NewRouter()
 
-func NewProfileRouter(controller ProfileController) *ProfileRouter {
-	return &ProfileRouter{
-		controller: controller,
-	}
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	mid := mymiddleware.NewMiddleware(auth)
+	r.Use(mid.AuthVerify)
+	r.Get("/profile/{id}", controller.GetProfile)
+	r.Post("/profile/take/{id}", controller.TakeBook)
+	r.Post("/profile/return/{id}", controller.ReturnBook)
+	return r
 }

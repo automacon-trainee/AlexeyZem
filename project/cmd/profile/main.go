@@ -3,44 +3,37 @@ package main
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"log"
 	"net"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/go-chi/jwtauth"
-	"github.com/go-redis/redis"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
-
-	"project/internal/API/gRPCAuth"
-	"project/internal/auth/controller"
-	"project/internal/auth/repository"
-	"project/internal/auth/service"
+	
+	"project/internal/API/gRPCProfile"
+	"project/internal/profile/controller"
+	"project/internal/profile/models"
+	"project/internal/profile/repository"
+	"project/internal/profile/service"
 	"project/internal/provider"
 	"project/internal/responder"
 )
 
-type AuthServ struct {
-	gRPCAuth.UnimplementedAuthServiceServer
-	authServer controller.AuthService
+type ProfileGRPC struct {
+	gRPCProfile.UnimplementedProfileServiceServer
+	profile controller.ProfileService
 }
 
-func (as *AuthServ) VerifyToken(_ context.Context, token *gRPCAuth.Token) (*gRPCAuth.User, error) {
-	user, err := as.authServer.VerifyToken(token.Token)
+func (p *ProfileGRPC) Create(ctx context.Context, profile *gRPCProfile.Profile) (*gRPCProfile.Null, error) {
+	err := p.profile.CreateProfile(ctx, models.Profile{ID: int(profile.Id), Name: profile.Name, Lastname: profile.LastName})
 	if err != nil {
 		return nil, err
 	}
-	res := &gRPCAuth.User{
-		Username: user.Username,
-		Email:    user.Email,
-		Password: user.Password,
-		Id:       int64(user.ID),
-	}
-	return res, nil
+
+	return &gRPCProfile.Null{}, nil
 }
 
 func main() {
@@ -79,44 +72,40 @@ func main() {
 		log.Printf("try to ping:%v", i)
 	}
 
-	repo := repository.NewPostgresDataBase(db)
-	err = repo.CreateNewUserTable(ctx)
+	repo := repository.NewPostgresDB(db)
+	err = repo.CreateTableProfile(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	secret := os.Getenv("SECRET_KEY")
-	token := jwtauth.New("HS256", []byte(secret), nil)
-	redisClient := redis.NewClient(&redis.Options{
-		Addr: "redis:6379",
-	})
-	authService := service.NewAuthServiceImpl(repo, token, redisClient)
+	serv := service.NewProfileServiceImpl(repo, provider.GetBookProvider())
 	logger := logrus.New()
 	resp := responder.NewResponder(logger)
-	control := controller.NewAuthController(resp, authService, provider.GetProfileProvider())
-	rout := controller.NewAuthRouter(control)
+	contr := controller.NewProfileController(serv, resp)
+	router := controller.NewProfileRouter(contr, provider.GetAuthProvider())
+
 	server := http.Server{
-		Addr:         ":1000",
-		Handler:      rout,
+		Addr:         "1001",
+		Handler:      router,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
-	go startGRPC(authService)
-	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logger.Fatal(err)
+	go StartGRPC(serv)
+	if err := server.ListenAndServe(); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func startGRPC(auth controller.AuthService) {
-	l, err := net.Listen("tcp", ":1234")
+func StartGRPC(profile controller.ProfileService) {
+	l, err := net.Listen("tcp", ":1236")
 	if err != nil {
 		log.Fatalf("failed to listen gRPC: %v", err)
 	}
 	server := grpc.NewServer()
-	gRPCAuth.RegisterAuthServiceServer(server, &AuthServ{
-		authServer: auth,
+	gRPCProfile.RegisterProfileServiceServer(server, &ProfileGRPC{
+		profile: profile,
 	})
-	log.Println("Listening on :1234 with protocol gRPC")
+	log.Println("Listening on :1235 with protocol gRPC")
 	if err := server.Serve(l); err != nil {
 		log.Fatal(err)
 	}

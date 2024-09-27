@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"project/internal/API/gRPCProfile"
 	"project/internal/auth/models"
 )
 
 type AuthService interface {
-	CreateUser(user models.User) error
+	CreateUser(user models.User) (int, error)
 	AuthUser(user models.User) (string, error)
 	VerifyToken(token string) (*models.User, error)
 }
@@ -24,12 +25,14 @@ type Responder interface {
 type AuthControllerImpl struct {
 	responder   Responder
 	serviceAuth AuthService
+	gRPCProfile gRPCProfile.ProfileServiceClient
 }
 
-func NewAuthController(responder Responder, serviceAuth AuthService) *AuthControllerImpl {
+func NewAuthController(responder Responder, serviceAuth AuthService, profile gRPCProfile.ProfileServiceClient) *AuthControllerImpl {
 	return &AuthControllerImpl{
 		responder:   responder,
 		serviceAuth: serviceAuth,
+		gRPCProfile: profile,
 	}
 }
 
@@ -40,11 +43,19 @@ func (ac *AuthControllerImpl) Register(w http.ResponseWriter, r *http.Request) {
 		ac.responder.ErrorBadRequest(w, err)
 		return
 	}
-	err = ac.serviceAuth.CreateUser(models.User{Username: regReq.Username, Password: regReq.Password, Email: regReq.Email})
+	id, err := ac.serviceAuth.CreateUser(models.User{Username: regReq.Username, Password: regReq.Password, Email: regReq.Email})
 	if err != nil {
 		ac.responder.ErrorInternal(w, err)
 		return
 	}
+
+	_, err = ac.gRPCProfile.Create(r.Context(), &gRPCProfile.Profile{Id: int64(id), Name: regReq.Username})
+
+	if err != nil {
+		ac.responder.ErrorInternal(w, err)
+		return
+	}
+
 	ac.responder.OutputJSON(w, "user created")
 }
 

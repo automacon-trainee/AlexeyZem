@@ -16,7 +16,7 @@ import (
 )
 
 type UserRepository interface {
-	Create(ctx context.Context, user models.User) error
+	Create(ctx context.Context, user *models.User) error
 	GetByID(ctx context.Context, id string) (models.User, error)
 	GetByEmail(ctx context.Context, email string) (models.User, error)
 	List(ctx context.Context) ([]models.User, error)
@@ -36,13 +36,19 @@ func NewAuthServiceImpl(repo UserRepository, token *jwtauth.JWTAuth, client *red
 	}
 }
 
-func (a *AuthServiceImpl) CreateUser(user models.User) error {
+func (a *AuthServiceImpl) CreateUser(user models.User) (int, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	user.Password = string(hash)
-	return a.repo.Create(context.Background(), user)
+	err = a.repo.Create(context.Background(), &user)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return user.ID, nil
 }
 
 func (a *AuthServiceImpl) AuthUser(user models.User) (string, error) {
@@ -95,6 +101,6 @@ func (a *AuthServiceImpl) VerifyToken(token string) (*models.User, error) {
 		log.Println(err)
 		return nil, fmt.Errorf("VerifyToken :%w", err)
 	}
-	
+
 	return &user, nil
 }

@@ -68,7 +68,6 @@ func (s *ProfileServiceImpl) TakeBook(ctx context.Context, profileID, bookID int
 	}
 
 	return nil
-
 }
 
 func (s *ProfileServiceImpl) ReturnBook(ctx context.Context, profileID, bookID int) error {

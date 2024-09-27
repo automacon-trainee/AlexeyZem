@@ -1,6 +1,6 @@
 syntax="proto3";
 
-package gRPCAuth;
+package gRPCBook;
 
 option go_package = "project/gRPCBook";
 

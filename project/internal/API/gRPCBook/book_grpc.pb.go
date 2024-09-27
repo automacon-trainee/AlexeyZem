@@ -19,9 +19,9 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	BookService_Take_FullMethodName   = "/gRPCAuth.BookService/Take"
-	BookService_Return_FullMethodName = "/gRPCAuth.BookService/Return"
-	BookService_Get_FullMethodName    = "/gRPCAuth.BookService/Get"
+	BookService_Take_FullMethodName   = "/gRPCBook.BookService/Take"
+	BookService_Return_FullMethodName = "/gRPCBook.BookService/Return"
+	BookService_Get_FullMethodName    = "/gRPCBook.BookService/Get"
 )
 
 // BookServiceClient is the client API for BookService service.
@@ -176,7 +176,7 @@ func _BookService_Get_Handler(srv interface{}, ctx context.Context, dec func(int
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var BookService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "gRPCAuth.BookService",
+	ServiceName: "gRPCBook.BookService",
 	HandlerType: (*BookServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
