@@ -15,14 +15,26 @@ import (
 
 	"github.com/go-redis/redis"
 
-	"metrics/internal/controller"
 	"metrics/internal/metrics"
 	"metrics/internal/models"
-	"metrics/internal/repository"
 )
 
+type UserRepository interface {
+	Create(ctx context.Context, user models.User) error
+	GetByID(ctx context.Context, id string) (models.User, error)
+	GetByEmail(ctx context.Context, email string) (models.User, error)
+	List(ctx context.Context) ([]models.User, error)
+}
+
+func NewUserServiceImpl(repo UserRepository, token *jwtauth.JWTAuth) *UserServiceImpl {
+	return &UserServiceImpl{
+		repo:  repo,
+		token: token,
+	}
+}
+
 type UserServiceImpl struct {
-	repo  repository.UserRepository
+	repo  UserRepository
 	token *jwtauth.JWTAuth
 }
 
@@ -61,17 +73,25 @@ func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
 	return s.repo.GetByEmail(context.Background(), email)
 }
 
-func NewUserServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth) *UserServiceImpl {
-	return &UserServiceImpl{
-		repo:  repo,
-		token: token,
-	}
+type UserService interface {
+	CreateUser(user models.User) error
+	AuthUser(user models.User) (string, error)
+	GetUserByEmail(email string) (models.User, error)
+	GetAllUsers() ([]models.User, error)
 }
 
 type UserServiceProxy struct {
-	userService controller.UserService
+	userService UserService
 	client      *redis.Client
 	metrics     *metrics.ProxyMetrics
+}
+
+func NewUserServiceProxy(userService UserService, client *redis.Client) *UserServiceProxy {
+	return &UserServiceProxy{
+		userService: userService,
+		client:      client,
+		metrics:     metrics.NewProxyMetrics(),
+	}
 }
 
 func (s *UserServiceProxy) CreateUser(user models.User) error {
@@ -128,12 +148,4 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 	user := models.User{}
 	err = json.Unmarshal([]byte(data), &user)
 	return user, err
-}
-
-func NewUserServiceProxy(userService controller.UserService, client *redis.Client) *UserServiceProxy {
-	return &UserServiceProxy{
-		userService: userService,
-		client:      client,
-		metrics:     metrics.NewProxyMetrics(),
-	}
 }

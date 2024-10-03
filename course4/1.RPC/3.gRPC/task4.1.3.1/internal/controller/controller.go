@@ -24,6 +24,15 @@ type UserService interface {
 	GetAllUsers() ([]models.User, error)
 }
 
+type Responder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorUnAuthorized(w http.ResponseWriter, err error)
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+	ErrorForbidden(w http.ResponseWriter, err error)
+}
+
 type GeoController struct {
 	responder   Responder
 	serviceGeo  GeodataServiceRPC
