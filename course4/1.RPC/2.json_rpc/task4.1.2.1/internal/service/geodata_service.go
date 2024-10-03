@@ -17,12 +17,14 @@ import (
 	"metrics/internal/models"
 )
 
-type GeodataService interface {
-	Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error
-	Geocode(address models.ResponseAddress, res *models.ResponseAddressGeocode) error
-}
 type GeodataServiceImpl struct {
 	metrics *metrics.ProxyMetrics
+}
+
+func NewGeodataService() *GeodataServiceImpl {
+	return &GeodataServiceImpl{
+		metrics: metrics.NewProxyMetrics(),
+	}
 }
 
 func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error {
@@ -62,7 +64,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 		return err
 	}
 
-	coord := []models.ResponseAddressGeocode{}
+	var coord []models.ResponseAddressGeocode
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return err
@@ -74,16 +76,23 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 	return nil
 }
 
-func NewGeodataService() GeodataService {
-	return &GeodataServiceImpl{
-		metrics: metrics.NewProxyMetrics(),
-	}
+type GeodataService interface {
+	Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error
+	Geocode(address models.ResponseAddress, res *models.ResponseAddressGeocode) error
 }
 
 type GeodataServiceProxy struct {
 	service GeodataService
 	client  *redis.Client
 	metrics *metrics.ProxyMetrics
+}
+
+func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) *GeodataServiceProxy {
+	return &GeodataServiceProxy{
+		service: serv,
+		client:  client,
+		metrics: metrics.NewProxyMetrics(),
+	}
 }
 
 func (g *GeodataServiceProxy) Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error {
@@ -141,16 +150,8 @@ func (g *GeodataServiceProxy) Geocode(arg models.ResponseAddress, res *models.Re
 	return err
 }
 
-func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) GeodataService {
-	return &GeodataServiceProxy{
-		service: serv,
-		client:  client,
-		metrics: metrics.NewProxyMetrics(),
-	}
-}
-
 func GetQuery(address models.ResponseAddress) string {
-	parts := []string{}
+	var parts []string
 	parts = append(parts, strings.Split(address.Address.Road, " ")...)
 	parts = append(parts, strings.Split(address.Address.Town, " ")...)
 	parts = append(parts, strings.Split(address.Address.State, " ")...)
