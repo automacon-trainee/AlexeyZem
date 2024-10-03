@@ -12,14 +12,13 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 
-	"projectService/internal/controller"
 	"projectService/internal/custom_error"
 	"projectService/internal/model"
 )
 
 type Service struct{}
 
-func NewService() controller.GeoServicer {
+func NewService() *Service {
 	return &Service{}
 }
 
@@ -79,7 +78,7 @@ func (s *Service) Geocode(address model.ResponseAddress) (model.ResponseAddressG
 		return model.ResponseAddressGeocode{}, err
 	}
 
-	coord := []model.ResponseAddressGeocode{}
+	var coord []model.ResponseAddressGeocode
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return model.ResponseAddressGeocode{}, err

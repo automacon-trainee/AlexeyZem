@@ -21,6 +21,15 @@ type GeoController struct {
 	service   GeoServicer
 }
 
+type Responder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorUnAuthorized(w http.ResponseWriter, err error)
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+	ErrorForbidden(w http.ResponseWriter, err error)
+}
+
 func NewGeoController(responder Responder, serv GeoServicer) *GeoController {
 	return &GeoController{
 		responder: responder,
