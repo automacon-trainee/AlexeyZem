@@ -15,10 +15,6 @@ import (
 	"pprof/internal/models"
 )
 
-type GeodataService interface {
-	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
-	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
-}
 type GeodataServiceImpl struct{}
 
 func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
@@ -44,7 +40,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress) (models.Res
 		return models.ResponseAddressGeocode{}, err
 	}
 
-	coord := []models.ResponseAddressGeocode{}
+	var coord = []models.ResponseAddressGeocode
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return models.ResponseAddressGeocode{}, err

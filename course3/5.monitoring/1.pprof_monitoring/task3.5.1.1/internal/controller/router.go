@@ -9,6 +9,15 @@ import (
 	"github.com/go-chi/jwtauth"
 )
 
+type Controller interface {
+	Register(w http.ResponseWriter, r *http.Request)
+	Auth(w http.ResponseWriter, r *http.Request)
+	Search(w http.ResponseWriter, r *http.Request)
+	Geocode(w http.ResponseWriter, r *http.Request)
+	GetByEmail(w http.ResponseWriter, r *http.Request)
+	GetAllUsers(w http.ResponseWriter, r *http.Request)
+}
+
 func NewRouter(controller Controller, auth *jwtauth.JWTAuth) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(middleware.Logger)

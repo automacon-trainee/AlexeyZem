@@ -15,19 +15,25 @@ import (
 	"github.com/go-redis/redis"
 
 	"pprof/internal/models"
-	"pprof/internal/repository"
 )
 
-type UserService interface {
-	CreateUser(user models.User) error
-	AuthUser(user models.User) (string, error)
-	GetUserByEmail(email string) (models.User, error)
-	GetAllUsers() ([]models.User, error)
+type UserRepository interface {
+	Create(ctx context.Context, user models.User) error
+	GetByID(ctx context.Context, id string) (models.User, error)
+	GetByEmail(ctx context.Context, email string) (models.User, error)
+	List(ctx context.Context) ([]models.User, error)
 }
 
 type UserServiceImpl struct {
-	repo  repository.UserRepository
+	repo  UserRepository
 	token *jwtauth.JWTAuth
+}
+
+func NewUserServiceImpl(repo UserRepository, token *jwtauth.JWTAuth) *UserServiceImpl {
+	return &UserServiceImpl{
+		repo:  repo,
+		token: token,
+	}
 }
 
 func (s *UserServiceImpl) CreateUser(user models.User) error {
@@ -65,16 +71,16 @@ func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
 	return s.repo.GetByEmail(context.Background(), email)
 }
 
-func NewUserServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth) UserService {
-	return &UserServiceImpl{
-		repo:  repo,
-		token: token,
-	}
+type UserServiceProxy struct {
+	userService *UserServiceImpl
+	client      *redis.Client
 }
 
-type UserServiceProxy struct {
-	userService UserService
-	client      *redis.Client
+func NewUserServiceProxy(userService *UserServiceImpl, client *redis.Client) *UserServiceProxy {
+	return &UserServiceProxy{
+		userService: userService,
+		client:      client,
+	}
 }
 
 func (s *UserServiceProxy) CreateUser(user models.User) error {
@@ -117,11 +123,4 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 	user := models.User{}
 	err = json.Unmarshal([]byte(data), &user)
 	return user, err
-}
-
-func NewUserServiceProxy(userService UserService, client *redis.Client) UserService {
-	return &UserServiceProxy{
-		userService: userService,
-		client:      client,
-	}
 }
