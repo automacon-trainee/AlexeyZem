@@ -10,26 +10,37 @@ import (
 
 	"metrics/internal/metrics"
 	"metrics/internal/models"
-	"metrics/internal/service"
 )
 
-type Controller interface {
-	Register(w http.ResponseWriter, r *http.Request)
-	Auth(w http.ResponseWriter, r *http.Request)
-	Search(w http.ResponseWriter, r *http.Request)
-	Geocode(w http.ResponseWriter, r *http.Request)
-	GetByEmail(w http.ResponseWriter, r *http.Request)
-	GetAllUsers(w http.ResponseWriter, r *http.Request)
+type Responder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorUnAuthorized(w http.ResponseWriter, err error)
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+	ErrorForbidden(w http.ResponseWriter, err error)
+}
+
+type GeodataService interface {
+	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
+	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
+}
+
+type UserService interface {
+	CreateUser(user models.User) error
+	AuthUser(user models.User) (string, error)
+	GetUserByEmail(email string) (models.User, error)
+	GetAllUsers() ([]models.User, error)
 }
 
 type GeoController struct {
 	responder   Responder
-	serviceGeo  service.GeodataService
-	serviceUser service.UserService
+	serviceGeo  GeodataService
+	serviceUser UserService
 	metrics     *metrics.ProxyMetrics
 }
 
-func NewGeoController(responder Responder, servGeo service.GeodataService, servUser service.UserService) *GeoController {
+func NewGeoController(responder Responder, servGeo GeodataService, servUser UserService) *GeoController {
 	return &GeoController{
 		responder:   responder,
 		serviceGeo:  servGeo,

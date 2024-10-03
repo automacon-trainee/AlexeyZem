@@ -17,12 +17,14 @@ import (
 	"metrics/internal/models"
 )
 
-type GeodataService interface {
-	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
-	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
-}
 type GeodataServiceImpl struct {
 	metrics *metrics.ProxyMetrics
+}
+
+func NewGeodataService() *GeodataServiceImpl {
+	return &GeodataServiceImpl{
+		metrics: metrics.NewProxyMetrics(),
+	}
 }
 
 func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
@@ -62,7 +64,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress) (models.Res
 		return models.ResponseAddressGeocode{}, err
 	}
 
-	coord := []models.ResponseAddressGeocode{}
+	var coord []models.ResponseAddressGeocode
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return models.ResponseAddressGeocode{}, err
@@ -70,16 +72,18 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress) (models.Res
 	return coord[0], nil
 }
 
-func NewGeodataService() GeodataService {
-	return &GeodataServiceImpl{
-		metrics: metrics.NewProxyMetrics(),
-	}
-}
-
 type GeodataServiceProxy struct {
-	service GeodataService
+	service *GeodataServiceImpl
 	client  *redis.Client
 	metrics *metrics.ProxyMetrics
+}
+
+func NewGeodataServiceProxy(serv *GeodataServiceImpl, client *redis.Client) *GeodataServiceProxy {
+	return &GeodataServiceProxy{
+		service: serv,
+		client:  client,
+		metrics: metrics.NewProxyMetrics(),
+	}
 }
 
 func (g *GeodataServiceProxy) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
@@ -139,16 +143,8 @@ func (g *GeodataServiceProxy) Geocode(address models.ResponseAddress) (models.Re
 	return res, err
 }
 
-func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) GeodataService {
-	return &GeodataServiceProxy{
-		service: serv,
-		client:  client,
-		metrics: metrics.NewProxyMetrics(),
-	}
-}
-
 func GetQuery(address models.ResponseAddress) string {
-	parts := []string{}
+	var parts []string
 	parts = append(parts, strings.Split(address.Address.Road, " ")...)
 	parts = append(parts, strings.Split(address.Address.Town, " ")...)
 	parts = append(parts, strings.Split(address.Address.State, " ")...)
