@@ -16,13 +16,20 @@ type GeodataService interface {
 	Geocode(address models.ResponseAddress, res *models.ResponseAddressGeocode) error
 }
 
+type GeoResponder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+}
+
 type GeoControllerImpl struct {
-	responder  Responder
+	responder  GeoResponder
 	serviceGeo GeodataService
 	metrics    *metrics.ProxyMetrics
 }
 
-func NewGeoController(responder Responder, servGeo GeodataService) *GeoControllerImpl {
+func NewGeoController(responder GeoResponder, servGeo GeodataService) *GeoControllerImpl {
 	return &GeoControllerImpl{
 		responder:  responder,
 		serviceGeo: servGeo,

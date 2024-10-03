@@ -17,13 +17,21 @@ type AuthService interface {
 	VerifyToken(token string) (*models.User, error)
 }
 
+type AuthResponder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorUnAuthorized(w http.ResponseWriter, err error)
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+}
+
 type AuthControllerImpl struct {
-	responder   Responder
+	responder   AuthResponder
 	serviceAuth AuthService
 	metrics     *metrics.ProxyMetrics
 }
 
-func NewAuthController(responder Responder, serviceAuth AuthService) *AuthControllerImpl {
+func NewAuthController(responder AuthResponder, serviceAuth AuthService) *AuthControllerImpl {
 	return &AuthControllerImpl{
 		responder:   responder,
 		serviceAuth: serviceAuth,

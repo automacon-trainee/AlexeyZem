@@ -21,13 +21,6 @@ type PostgressDataBase struct {
 	metrics *metrics.ProxyMetrics
 }
 
-type UserRepository interface {
-	Create(ctx context.Context, user models.User) error
-	GetByID(ctx context.Context, id string) (models.User, error)
-	GetByEmail(ctx context.Context, email string) (models.User, error)
-	List(ctx context.Context) ([]models.User, error)
-}
-
 func StartPostgressDataBase(ctx context.Context, connStr string) (*PostgressDataBase, error) {
 	if val, ok := connect[connStr]; ok {
 		return val, nil
