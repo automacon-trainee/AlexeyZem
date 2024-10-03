@@ -13,11 +13,21 @@ import (
 	"metrics/internal/controller"
 	"metrics/internal/metrics"
 	"metrics/internal/models"
-	"metrics/internal/repository"
 )
 
+type UserRepository interface {
+	GetByEmail(ctx context.Context, email string) (models.User, error)
+	List(ctx context.Context) ([]models.User, error)
+}
+
 type UserServiceImpl struct {
-	repo repository.UserRepository
+	repo UserRepository
+}
+
+func NewUserServiceImpl(repo UserRepository) *UserServiceImpl {
+	return &UserServiceImpl{
+		repo: repo,
+	}
 }
 
 func (s *UserServiceImpl) GetAllUsers() ([]models.User, error) {
@@ -28,16 +38,23 @@ func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
 	return s.repo.GetByEmail(context.Background(), email)
 }
 
-func NewUserServiceImpl(repo repository.UserRepository) *UserServiceImpl {
-	return &UserServiceImpl{
-		repo: repo,
-	}
-}
-
 type UserServiceProxy struct {
 	userService controller.UserService
 	client      *redis.Client
 	metrics     *metrics.ProxyMetrics
+}
+
+type UserService interface {
+	GetUserByEmail(email string) (models.User, error)
+	GetAllUsers() ([]models.User, error)
+}
+
+func NewUserServiceProxy(userService UserService, client *redis.Client) *UserServiceProxy {
+	return &UserServiceProxy{
+		userService: userService,
+		client:      client,
+		metrics:     metrics.NewProxyMetrics(),
+	}
 }
 
 func (s *UserServiceProxy) GetAllUsers() ([]models.User, error) {
@@ -86,12 +103,4 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 	user := models.User{}
 	err = json.Unmarshal([]byte(data), &user)
 	return user, err
-}
-
-func NewUserServiceProxy(userService controller.UserService, client *redis.Client) *UserServiceProxy {
-	return &UserServiceProxy{
-		userService: userService,
-		client:      client,
-		metrics:     metrics.NewProxyMetrics(),
-	}
 }
