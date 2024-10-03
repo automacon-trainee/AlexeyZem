@@ -12,10 +12,6 @@ type mockRepo map[string]string
 
 const expiration = time.Minute * 10
 
-type SomeRepository interface {
-	GetData(key string) string
-}
-
 type SomeRepositoryImpl struct {
 	repo mockRepo // imitation repository
 }
@@ -39,6 +35,10 @@ func (s *SomeRepositoryImpl) SetData(key, val string) {
 type CacherClient interface {
 	Set(key string, value interface{}, expiration time.Duration) *redis.StatusCmd
 	Get(key string) *redis.StringCmd
+}
+
+type SomeRepository interface {
+	GetData(key string) string
 }
 
 type SomeRepositoryProxyImpl struct {
