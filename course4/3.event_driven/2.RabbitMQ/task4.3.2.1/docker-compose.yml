@@ -1,0 +1,155 @@
+version: '3.8'
+
+services:
+  geoservice:
+    build:
+      context: .
+      dockerfile: GeoDockerfile/Dockerfile
+    ports:
+      - "2080:2080"
+    depends_on:
+      - auth
+
+  auth:
+    build:
+      context: .
+      dockerfile: authDockerfile/Dockerfile
+    ports:
+      - "3080:3080"
+    depends_on:
+      - db
+      - rabbitmq
+      - redis
+      - grafana
+      - prometheus
+
+  users:
+    build:
+      context: .
+      dockerfile: userDockerfile/Dockerfile
+    ports:
+      - "1080:1080"
+    depends_on:
+      - auth
+
+  notify:
+    build:
+      context: .
+      dockerfile: notifyDockerfile/Dockerfile
+    ports:
+      - "4080:4080"
+    depends_on:
+      - auth
+
+  project:
+    build:
+      context: .
+      dockerfile: proxyDockerfile/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth
+      - geoservice
+      - notify
+      - users
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - DATABASE_HOST=${DB_HOST}
+    volumes:
+      - postgres_data:/var/lib/postgresql/grafana_app_data
+    healthcheck:
+      test: "pg_isready --username=postgres && psql --username=postgres --list"
+      timeout: 10s
+      retries: 20
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prom_data:/prometheus
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=${ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    volumes:
+      - ./grafana:/etc/grafana/provisioning/datasources
+
+  rabbitmq:
+    image: 'rabbitmq:3-management'
+    hostname: "rabbitmq"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    volumes:
+      - ./rabbit-mq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: [ "CMD", "rabbitmqctl", "status" ]
+      interval: 5s
+      timeout: 15s
+      retries: 5
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redisdata:/data
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+    command: >
+      sh -c '
+        mkdir -p /usr/local/etc/redis &&
+        echo "bind 0.0.0.0" > /usr/local/etc/redis/redis.conf &&
+        echo "requirepass $REDIS_PASSWORD" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
+        echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
+        echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
+      '
+    healthcheck:
+      test: [ "CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+
+volumes:
+  postgres_data:
+  prom_data:

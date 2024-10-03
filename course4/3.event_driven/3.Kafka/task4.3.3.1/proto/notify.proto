@@ -1,0 +1,16 @@
+syntax="proto3";
+
+package gRPCNotify;
+
+option go_package = "metrics/gRPCNotify";
+
+service NotifyService{
+  rpc SendMessage(Message) returns (Mock){}
+}
+
+message Message{
+  string email = 1;
+  string text = 2;
+}
+
+message Mock{}
