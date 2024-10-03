@@ -10,14 +10,15 @@ import (
 
 	"metrics/internal/metrics"
 	"metrics/internal/models"
-	"metrics/internal/service"
 )
 
-type GeoController struct {
-	responder   Responder
-	serviceGeo  service.GeodataService
-	serviceUser service.UserService
-	metrics     *metrics.ProxyMetrics
+type Responder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorUnAuthorized(w http.ResponseWriter, err error)
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+	ErrorForbidden(w http.ResponseWriter, err error)
 }
 
 type UserService interface {
@@ -30,6 +31,13 @@ type UserService interface {
 type GeodataService interface {
 	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
 	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
+}
+
+type GeoController struct {
+	responder   Responder
+	serviceGeo  GeodataService
+	serviceUser UserService
+	metrics     *metrics.ProxyMetrics
 }
 
 func NewGeoController(responder Responder, servGeo GeodataService, servUser UserService) *GeoController {

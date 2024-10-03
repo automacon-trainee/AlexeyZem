@@ -26,16 +26,16 @@ type UserRepository interface {
 	List(ctx context.Context) ([]models.User, error)
 }
 
-type UserService interface {
-	CreateUser(user models.User) error
-	AuthUser(user models.User) (string, error)
-	GetUserByEmail(email string) (models.User, error)
-	GetAllUsers() ([]models.User, error)
-}
-
 type UserServiceImpl struct {
 	repo  UserRepository
 	token *jwtauth.JWTAuth
+}
+
+func NewUserServiceImpl(repo UserRepository, token *jwtauth.JWTAuth) *UserServiceImpl {
+	return &UserServiceImpl{
+		repo:  repo,
+		token: token,
+	}
 }
 
 func (s *UserServiceImpl) CreateUser(user models.User) error {
@@ -74,17 +74,18 @@ func (s *UserServiceImpl) GetUserByEmail(email string) (models.User, error) {
 	return s.repo.GetByEmail(context.Background(), email)
 }
 
-func NewUserServiceImpl(repo UserRepository, token *jwtauth.JWTAuth) UserService {
-	return &UserServiceImpl{
-		repo:  repo,
-		token: token,
-	}
-}
-
 type UserServiceProxy struct {
-	userService UserService
+	userService *UserServiceImpl
 	client      *redis.Client
 	metrics     *metrics.ProxyMetrics
+}
+
+func NewUserServiceProxy(userService *UserServiceImpl, client *redis.Client) *UserServiceProxy {
+	return &UserServiceProxy{
+		userService: userService,
+		client:      client,
+		metrics:     metrics.NewProxyMetrics(),
+	}
 }
 
 func (s *UserServiceProxy) CreateUser(user models.User) error {
@@ -141,12 +142,4 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 	user := models.User{}
 	err = json.Unmarshal([]byte(data), &user)
 	return user, err
-}
-
-func NewUserServiceProxy(userService UserService, client *redis.Client) UserService {
-	return &UserServiceProxy{
-		userService: userService,
-		client:      client,
-		metrics:     metrics.NewProxyMetrics(),
-	}
 }

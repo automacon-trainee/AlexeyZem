@@ -17,11 +17,6 @@ import (
 	"metrics/internal/models"
 )
 
-type GeodataService interface {
-	Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error)
-	Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error)
-}
-
 type Metrics interface {
 	NewDurationHistogram(string, string, []float64) prometheus.Histogram
 }
@@ -30,7 +25,7 @@ type GeodataServiceImpl struct {
 	metrics Metrics
 }
 
-func NewGeodataService(metr Metrics) GeodataService {
+func NewGeodataService(metr Metrics) *GeodataServiceImpl {
 	return &GeodataServiceImpl{
 		metrics: metr,
 	}
@@ -82,9 +77,17 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress) (models.Res
 }
 
 type GeodataServiceProxy struct {
-	service GeodataService
+	service *GeodataServiceImpl
 	client  *redis.Client
 	metrics *metrics.ProxyMetrics
+}
+
+func NewGeodataServiceProxy(serv *GeodataServiceImpl, client *redis.Client) *GeodataServiceProxy {
+	return &GeodataServiceProxy{
+		service: serv,
+		client:  client,
+		metrics: metrics.NewProxyMetrics(),
+	}
 }
 
 func (g *GeodataServiceProxy) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
@@ -142,14 +145,6 @@ func (g *GeodataServiceProxy) Geocode(address models.ResponseAddress) (models.Re
 	duration := time.Since(start).Seconds()
 	metric.Observe(duration)
 	return res, err
-}
-
-func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) GeodataService {
-	return &GeodataServiceProxy{
-		service: serv,
-		client:  client,
-		metrics: metrics.NewProxyMetrics(),
-	}
 }
 
 func GetQuery(address models.ResponseAddress) string {
