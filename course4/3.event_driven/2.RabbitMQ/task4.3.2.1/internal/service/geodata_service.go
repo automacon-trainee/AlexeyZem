@@ -13,7 +13,6 @@ import (
 	"github.com/go-redis/redis"
 	"github.com/prometheus/client_golang/prometheus"
 
-	"metrics/internal/controller"
 	"metrics/internal/metrics"
 	"metrics/internal/models"
 )
@@ -59,7 +58,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 		return err
 	}
 
-	coord := []models.ResponseAddressGeocode{}
+	var coord []models.ResponseAddressGeocode
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return err
@@ -77,10 +76,23 @@ func NewGeodataService() *GeodataServiceImpl {
 	}
 }
 
+type GeodataService interface {
+	Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error
+	Geocode(address models.ResponseAddress, res *models.ResponseAddressGeocode) error
+}
+
 type GeodataServiceProxy struct {
-	service controller.GeodataService
+	service GeodataService
 	client  *redis.Client
 	metrics *metrics.ProxyMetrics
+}
+
+func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) *GeodataServiceProxy {
+	return &GeodataServiceProxy{
+		service: serv,
+		client:  client,
+		metrics: metrics.NewProxyMetrics(),
+	}
 }
 
 func (g *GeodataServiceProxy) Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error {
@@ -138,16 +150,8 @@ func (g *GeodataServiceProxy) Geocode(arg models.ResponseAddress, res *models.Re
 	return err
 }
 
-func NewGeodataServiceProxy(serv controller.GeodataService, client *redis.Client) *GeodataServiceProxy {
-	return &GeodataServiceProxy{
-		service: serv,
-		client:  client,
-		metrics: metrics.NewProxyMetrics(),
-	}
-}
-
 func GetQuery(address models.ResponseAddress) string {
-	parts := []string{}
+	var parts []string
 	parts = append(parts, strings.Split(address.Address.Road, " ")...)
 	parts = append(parts, strings.Split(address.Address.Town, " ")...)
 	parts = append(parts, strings.Split(address.Address.State, " ")...)

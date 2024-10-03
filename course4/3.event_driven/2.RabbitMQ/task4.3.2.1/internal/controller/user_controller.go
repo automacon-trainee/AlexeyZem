@@ -16,13 +16,20 @@ type UserService interface {
 	GetAllUsers() ([]models.User, error)
 }
 
+type UserResponder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+}
+
 type UserControllerImpl struct {
-	responder   Responder
+	responder   UserResponder
 	serviceUser UserService
 	metrics     *metrics.ProxyMetrics
 }
 
-func NewUserController(responder Responder, servUser UserService) *UserControllerImpl {
+func NewUserController(responder UserResponder, servUser UserService) *UserControllerImpl {
 	return &UserControllerImpl{
 		responder:   responder,
 		serviceUser: servUser,
