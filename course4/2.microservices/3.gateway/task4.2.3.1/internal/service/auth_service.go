@@ -13,16 +13,20 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"metrics/internal/models"
-	"metrics/internal/repository"
 )
 
+type AuthRepository interface {
+	Create(ctx context.Context, user models.User) error
+	GetByEmail(ctx context.Context, email string) (models.User, error)
+}
+
 type AuthServiceImpl struct {
-	repo        repository.UserRepository
+	repo        AuthRepository
 	token       *jwtauth.JWTAuth
 	redisClient *redis.Client
 }
 
-func NewAuthServiceImpl(repo repository.UserRepository, token *jwtauth.JWTAuth, client *redis.Client) *AuthServiceImpl {
+func NewAuthServiceImpl(repo AuthRepository, token *jwtauth.JWTAuth, client *redis.Client) *AuthServiceImpl {
 	return &AuthServiceImpl{
 		repo:        repo,
 		token:       token,
