@@ -4,32 +4,34 @@ import (
 	"math/rand"
 	"time"
 
-	"golibrary/entities"
-	"golibrary/internal/repository"
-
 	"github.com/brianvoe/gofakeit"
+	"golibrary/entities"
 )
 
-type LibraryFacade struct {
-	Repo repository.Librarer
-}
-
-type Servicer interface {
-	StartService() error
+type Librarer interface {
+	CreateAuthor(author entities.Author) error
+	CreateBook(book entities.Book) error
+	CreateUser(user entities.User) error
 	TakeBook(userID, bookID int) error
 	ReturnBook(book entities.Book) error
-	AllUsersInfo() ([]entities.User, error)
-	AllAuthorsInfo() ([]entities.Author, error)
-	AddBook(book entities.Book) error
-	AddUser(user entities.User) error
-	AddAuthor(author entities.Author) error
+	GetBookByID(id int) (entities.Book, error)
+	GetAuthorByID(id int) (entities.Author, error)
+	GetUserByID(id int) (entities.User, error)
+	GetAllUsers() ([]entities.User, error)
+	GetAllBooksTakenByUser(userID int) ([]entities.Book, error)
+	GetAllAuthors() ([]entities.Author, error)
+	GetAllAuthorBooks(authorID int) ([]entities.Book, error)
 	GetAllBooks() ([]entities.Book, error)
-	BookInfo(bookID int) (entities.Book, error)
-	AuthorInfo(authorID int) (entities.Author, error)
-	UserInfo(userID int) (entities.User, error)
+	HowManyAuthorsExist() (int, error)
+	HowManyBooksExist() (int, error)
+	HowManyUsersExist() (int, error)
 }
 
-func NewLibraryFacade(repo repository.Librarer) (*LibraryFacade, error) {
+type LibraryFacade struct {
+	Repo Librarer
+}
+
+func NewLibraryFacade(repo Librarer) (*LibraryFacade, error) {
 	lf := &LibraryFacade{Repo: repo}
 	err := lf.StartService()
 	return lf, err

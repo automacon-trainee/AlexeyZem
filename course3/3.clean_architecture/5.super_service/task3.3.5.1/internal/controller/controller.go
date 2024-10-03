@@ -13,8 +13,31 @@ import (
 	"golibrary/internal/service"
 )
 
+type Responder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternalServerError(w http.ResponseWriter, err error)
+	ErrorNotFound(w http.ResponseWriter)
+}
+
+type Servicer interface {
+	StartService() error
+	TakeBook(userID, bookID int) error
+	ReturnBook(book entities.Book) error
+	AllUsersInfo() ([]entities.User, error)
+	AllAuthorsInfo() ([]entities.Author, error)
+	AddBook(book entities.Book) error
+	AddUser(user entities.User) error
+	AddAuthor(author entities.Author) error
+	GetAllBooks() ([]entities.Book, error)
+	BookInfo(bookID int) (entities.Book, error)
+	AuthorInfo(authorID int) (entities.Author, error)
+	UserInfo(userID int) (entities.User, error)
+}
+
 type UserControllerImpl struct {
-	Service   service.Servicer
+	Service   Servicer
 	responder Responder
 }
 

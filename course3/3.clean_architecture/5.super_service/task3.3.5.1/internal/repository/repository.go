@@ -13,25 +13,6 @@ type LibraryRepo struct {
 	db *sql.DB
 }
 
-type Librarer interface {
-	CreateAuthor(author entities.Author) error
-	CreateBook(book entities.Book) error
-	CreateUser(user entities.User) error
-	TakeBook(userID, bookID int) error
-	ReturnBook(book entities.Book) error
-	GetBookByID(id int) (entities.Book, error)
-	GetAuthorByID(id int) (entities.Author, error)
-	GetUserByID(id int) (entities.User, error)
-	GetAllUsers() ([]entities.User, error)
-	GetAllBooksTakenByUser(userID int) ([]entities.Book, error)
-	GetAllAuthors() ([]entities.Author, error)
-	GetAllAuthorBooks(authorID int) ([]entities.Book, error)
-	GetAllBooks() ([]entities.Book, error)
-	HowManyAuthorsExist() (int, error)
-	HowManyBooksExist() (int, error)
-	HowManyUsersExist() (int, error)
-}
-
 func NewLibraryRepo(db *sql.DB) (Librarer, error) {
 	service := &LibraryRepo{
 		db: db,
@@ -116,7 +97,7 @@ func (ls *LibraryRepo) CreateAuthor(author entities.Author) error {
 			return err
 		}
 	}
-	
+
 	return tx.Commit()
 }
 
