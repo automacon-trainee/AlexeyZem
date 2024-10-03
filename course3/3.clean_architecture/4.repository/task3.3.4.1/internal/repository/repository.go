@@ -22,7 +22,7 @@ type UserRepositoryImplSQL struct {
 	db DB
 }
 
-func NewUserRepository(db DB) service.UserRepository {
+func NewUserRepository(db DB) *UserRepositoryImplSQL {
 	return &UserRepositoryImplSQL{
 		db: db,
 	}
