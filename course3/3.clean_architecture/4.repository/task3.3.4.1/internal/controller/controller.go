@@ -19,6 +19,13 @@ type UserService interface {
 	Update(username string, user *models.User) (err error)
 }
 
+type Responder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorInternalServerError(w http.ResponseWriter, err error)
+}
+
 type ImplController struct {
 	responder Responder
 	service   UserService

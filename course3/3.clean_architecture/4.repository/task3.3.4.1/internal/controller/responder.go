@@ -6,13 +6,6 @@ import (
 	"net/http"
 )
 
-type Responder interface {
-	OutputJSON(w http.ResponseWriter, data any)
-
-	ErrorBadRequest(w http.ResponseWriter, err error)
-	ErrorInternalServerError(w http.ResponseWriter, err error)
-}
-
 type ResponderImpl struct {
 	logger *log.Logger
 }
