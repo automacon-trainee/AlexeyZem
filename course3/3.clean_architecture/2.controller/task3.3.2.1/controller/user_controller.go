@@ -9,8 +9,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserResponder interface {
+	OutputJSON(w http.ResponseWriter, data any)
+
+	ErrorBadRequest(w http.ResponseWriter, err error)
+	ErrorUnAuthorized(w http.ResponseWriter, err error)
+	ErrorInternal(w http.ResponseWriter, err error)
+}
+
 type UserController struct {
-	responder Responder
+	responder UserResponder
 }
 
 func (u *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -64,7 +72,7 @@ func (u *UserController) LoginUser(w http.ResponseWriter, r *http.Request) {
 	u.responder.OutputJSON(w, Data{Message: token})
 }
 
-func NewUserController(responder Responder) *UserController {
+func NewUserController(responder UserResponder) *UserController {
 	return &UserController{
 		responder: responder,
 	}
