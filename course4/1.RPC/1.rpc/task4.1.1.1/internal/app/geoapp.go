@@ -16,8 +16,7 @@ func RunGeoApp() error {
 	})
 	geoService := service.NewGeodataService()
 	geoProxy := service.NewGeodataServiceProxy(geoService, redisClient)
-	err := rpc.Register(geoProxy)
-	if err != nil {
+	if err := rpc.Register(geoProxy); err != nil {
 		return err
 	}
 

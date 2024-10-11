@@ -44,8 +44,7 @@ func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode, res *m
 		return err
 	}
 
-	err = json.Unmarshal(body, res)
-	if err != nil {
+	if err := json.Unmarshal(body, res); err != nil {
 		return err
 	}
 
@@ -71,8 +70,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 
 	var coord []models.ResponseAddressGeocode
 
-	err = json.Unmarshal(body, &coord)
-	if err != nil {
+	if err := json.Unmarshal(body, &coord); err != nil {
 		return err
 	}
 	if len(coord) == 0 {

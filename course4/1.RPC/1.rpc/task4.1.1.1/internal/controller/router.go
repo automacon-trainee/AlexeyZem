@@ -42,5 +42,6 @@ func NewRouter(controller Controller, auth *jwtauth.JWTAuth) *chi.Mux {
 
 func handlerNot(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	_, _ = w.Write([]byte("not found"))
+	str := []byte("not found")
+	_, _ = w.Write(str)
 }

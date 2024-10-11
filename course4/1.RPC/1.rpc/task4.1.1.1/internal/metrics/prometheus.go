@@ -16,8 +16,7 @@ func newCounter(name, help string) prometheus.Counter {
 		Help: help,
 	})
 
-	err := prometheus.Register(counter)
-	if err != nil {
+	if err := prometheus.Register(counter); err != nil {
 		log.Println(err)
 	}
 
@@ -31,8 +30,7 @@ func newDurationHistogram(name, help string, buckets []float64) prometheus.Histo
 		Buckets: buckets,
 	})
 
-	err := prometheus.Register(histogram)
-	if err != nil {
+	if err := prometheus.Register(histogram); err != nil {
 		log.Println(err)
 	}
 

@@ -63,14 +63,13 @@ func (gc *GeoController) Register(w http.ResponseWriter, r *http.Request) {
 
 	var regReq models.RegisterRequest
 
-	err := json.NewDecoder(r.Body).Decode(&regReq)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&regReq); err != nil {
 		gc.responder.ErrorBadRequest(w, err)
 		return
 	}
 
-	err = gc.serviceUser.CreateUser(models.User{Username: regReq.Username, Password: regReq.Password, Email: regReq.Email})
-	if err != nil {
+	user := models.User{Username: regReq.Username, Password: regReq.Password, Email: regReq.Email}
+	if err := gc.serviceUser.CreateUser(user); err != nil {
 		gc.responder.ErrorInternal(w, err)
 		return
 	}
@@ -92,8 +91,7 @@ func (gc *GeoController) Auth(w http.ResponseWriter, r *http.Request) {
 
 	var logReq models.LoginRequest
 
-	err := json.NewDecoder(r.Body).Decode(&logReq)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&logReq); err != nil {
 		gc.responder.ErrorBadRequest(w, err)
 		return
 	}
@@ -121,8 +119,7 @@ func (gc *GeoController) Search(w http.ResponseWriter, r *http.Request) {
 
 	var coord models.RequestAddressGeocode
 
-	err := json.NewDecoder(r.Body).Decode(&coord)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&coord); err != nil {
 		gc.responder.ErrorBadRequest(w, err)
 		return
 	}
@@ -150,8 +147,7 @@ func (gc *GeoController) Geocode(w http.ResponseWriter, r *http.Request) {
 
 	var address models.ResponseAddress
 
-	err := json.NewDecoder(r.Body).Decode(&address)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&address); err != nil {
 		gc.responder.ErrorBadRequest(w, err)
 		return
 	}

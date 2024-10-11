@@ -43,8 +43,7 @@ func StartPostgressDataBase(ctx context.Context, connStr string) (*PostgresDataB
 		return &dataBase, fmt.Errorf("failed to connect to postgres: %w", err)
 	}
 
-	err = db.Ping()
-	if err != nil {
+	if err := db.Ping(); err != nil {
 		return &dataBase, fmt.Errorf("failed to ping postgres: %w", err)
 	}
 
@@ -101,12 +100,11 @@ func (db *PostgresDataBase) GetByID(ctx context.Context, id string) (models.User
 	var user models.User
 
 	row := db.DB.QueryRowContext(ctx, getUser, id)
-	err := row.Scan(&user.Username, &user.Email)
-
-	if err != nil {
+	if err := row.Scan(&user.Username, &user.Email); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return user, fmt.Errorf("user with ID %s not found", id)
 		}
+
 		return user, err
 	}
 
@@ -133,11 +131,10 @@ func (db *PostgresDataBase) List(ctx context.Context) ([]models.User, error) {
 	var users []models.User
 	for rows.Next() {
 		var user models.User
-		err := rows.Scan(&user.Username, &user.Email, &user.Password)
-
-		if err != nil {
+		if err := rows.Scan(&user.Username, &user.Email, &user.Password); err != nil {
 			return nil, err
 		}
+
 		users = append(users, user)
 	}
 
@@ -161,13 +158,11 @@ func (db *PostgresDataBase) GetByEmail(ctx context.Context, email string) (model
 	var user models.User
 
 	row := db.DB.QueryRowContext(ctx, getByEmail, email)
-	err := row.Scan(&user.Username, &user.Email, &user.Password)
-
-	if err != nil {
+	if err := row.Scan(&user.Username, &user.Email, &user.Password); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return user, fmt.Errorf("user %s not found", email)
 		}
 	}
 
-	return user, err
+	return user, nil
 }
