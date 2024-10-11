@@ -18,18 +18,18 @@ func NewGeoRPC(client *rpc.Client) *GeoRPC {
 
 func (g *GeoRPC) Search(geocode models.RequestAddressGeocode) (models.ResponseAddress, error) {
 	var res models.ResponseAddress
-	err := g.client.Call("GeodataServiceProxy.Search", geocode, &res)
-	if err != nil {
-		return models.ResponseAddress{}, err
+	if err := g.client.Call("GeodataServiceProxy.Search", geocode, &res); err != nil {
+		return res, err
 	}
+
 	return res, nil
 }
 
 func (g *GeoRPC) Geocode(address models.ResponseAddress) (models.ResponseAddressGeocode, error) {
 	var res models.ResponseAddressGeocode
-	err := g.client.Call("GeodataServiceProxy.Geocode", address, &res)
-	if err != nil {
-		return models.ResponseAddressGeocode{}, err
+	if err := g.client.Call("GeodataServiceProxy.Geocode", address, &res); err != nil {
+		return res, err
 	}
+
 	return res, nil
 }
