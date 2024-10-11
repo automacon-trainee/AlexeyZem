@@ -1,0 +1,213 @@
+openapi: 3.0.0
+
+
+info:
+  title: Swagger Address - swagger "2.0"
+  description: |-
+    GeoData
+  version: 1.0.11
+
+servers:
+  - url: https://localhost:8080/api
+
+
+securityDefinitions:
+  token:
+    type: apiKey
+    name: Authorization
+    in: header
+
+paths:
+  /address/search:
+    post:
+      security:
+        - token: []
+      summary: search addres bu Lon and Lat
+      operationId: SearchAddress
+      requestBody:
+        description: Search addres
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchAddres'
+        required: true
+      responses:
+        "200":
+          description: Successfuly added
+          content:
+            text:
+              example: "You are in Country:Russia, Town:Moscow, Road:red square"
+        "400":
+          description: Invalid Input
+        "401":
+          description: NoToken
+        "403":
+          description: UnAthoraizedToken
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /address/geocode:
+    post:
+      security:
+        - token: []
+      summary: search geogocde by address
+      operationId: SearchGeocode
+      requestBody:
+        description: Search geocode
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchGeogode'
+        required: true
+      responses:
+        "200":
+          description: Successfuly added
+          content:
+            text:
+              example: "Coordinate: Lon: 12.12, Lat: 55.12"
+        "400":
+          description: Invalid Input
+        "401":
+          description: NoToken
+        "403":
+          description: UnAthoraizedToken
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /users/login:
+    post:
+      summary: login user
+      operationId: login
+      requestBody:
+        description: login user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "200":
+          description: Successfuly login
+          content:
+            text:
+              example: "some token"
+        "400":
+          description: Invalid Input
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /users/register:
+    post:
+      summary: register user
+      operationId: register
+      requestBody:
+        description: register user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "200":
+          description: Successfuly register
+          content:
+            text:
+              example: "user create"
+        "400":
+          description: Invalid Input
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+  /users:
+    get:
+      summary: get all users
+      operationId: getAll
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid Input
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+  /users/{email}:
+    get:
+      summary: get user by email
+      operationId: getOneUser
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Invalid Input
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+
+
+
+components:
+  schemas:
+    SearchAddres:
+      type: object
+      properties:
+        Lat:
+          type: number
+          example: 12.12
+        Lng:
+          type: number
+          example: 51.14
+
+    SearchGeogode:
+      type: object
+      properties:
+        address:
+          type: object
+          properties:
+            road:
+              type: string
+              example: "red square"
+            town:
+              type: string
+              example: "Moscow"
+            county:
+              type: string
+            state:
+              type: string
+            postcode:
+              type: string
+            country:
+              type: string
+            country_code:
+              type: string
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "test"
+        password:
+          type: string
+          example: "test"
+        email:
+          type: string
+          example: "test@mail.ru"

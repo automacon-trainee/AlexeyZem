@@ -1,0 +1,19 @@
+FROM golang:alpine AS build
+
+WORKDIR /geo
+
+COPY . .
+
+RUN go mod download
+
+RUN go build cmd/geodata_server.go
+
+FROM alpine:latest
+
+WORKDIR /geo
+
+EXPOSE 1234
+
+COPY --from=build /geo/geodata_server /geo/geodata_server
+
+CMD ["./geodata_server"]
