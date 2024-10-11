@@ -28,13 +28,15 @@ func NewGeodataService() *GeodataServiceImpl {
 }
 
 func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error {
-	metric := s.metrics.NewDurationHistogram("Search_to_api_histogram", "request duration Search in second in api",
+	metric := s.metrics.NewDurationHistogram("Search_to_api_histogram",
+		"request duration Search in second in api",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start).Seconds()
 		metric.Observe(duration)
 	}()
+
 	url := fmt.Sprintf("https://nominatim.openstreetmap.org/reverse?format=json&lat=%f&lon=%f", geocode.Lat, geocode.Lng)
 	body, err := ParseURLGet(url)
 	if err != nil {
@@ -46,16 +48,19 @@ func (s *GeodataServiceImpl) Search(geocode models.RequestAddressGeocode, res *m
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models.ResponseAddressGeocode) error {
-	metric := s.metrics.NewDurationHistogram("Geocode_to_api_histogram", "request duration Geocode in second in api",
+	metric := s.metrics.NewDurationHistogram("Geocode_to_api_histogram",
+		"request duration Geocode in second in api",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	start := time.Now()
 	defer func() {
 		duration := time.Since(start).Seconds()
 		metric.Observe(duration)
 	}()
+
 	q := GetQuery(address)
 	request := fmt.Sprintf("https://nominatim.openstreetmap.org/search?q=%s&format=json", q)
 
@@ -65,6 +70,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 	}
 
 	var coord []models.ResponseAddressGeocode
+
 	err = json.Unmarshal(body, &coord)
 	if err != nil {
 		return err
@@ -73,6 +79,7 @@ func (s *GeodataServiceImpl) Geocode(address models.ResponseAddress, res *models
 		return errors.New("no result")
 	}
 	*res = coord[0]
+
 	return nil
 }
 
@@ -96,7 +103,8 @@ func NewGeodataServiceProxy(serv GeodataService, client *redis.Client) *GeodataS
 }
 
 func (g *GeodataServiceProxy) Search(geocode models.RequestAddressGeocode, res *models.ResponseAddress) error {
-	metric := g.metrics.NewDurationHistogram("Search_from_cache", "request duration Search in second in cache",
+	metric := g.metrics.NewDurationHistogram("Search_from_cache",
+		"request duration Search in second in cache",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	start := time.Now()
 
@@ -120,11 +128,13 @@ func (g *GeodataServiceProxy) Search(geocode models.RequestAddressGeocode, res *
 	err = json.Unmarshal([]byte(val), res)
 	duration := time.Since(start).Seconds()
 	metric.Observe(duration)
+
 	return err
 }
 
 func (g *GeodataServiceProxy) Geocode(arg models.ResponseAddress, res *models.ResponseAddressGeocode) error {
-	metric := g.metrics.NewDurationHistogram("Geocode_from_cache", "request duration Geocode in second in cache",
+	metric := g.metrics.NewDurationHistogram("Geocode_from_cache",
+		"request duration Geocode in second in cache",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	start := time.Now()
 	str, err := json.Marshal(arg)
@@ -141,12 +151,14 @@ func (g *GeodataServiceProxy) Geocode(arg models.ResponseAddress, res *models.Re
 		if errors.Is(err, redis.Nil) {
 			g.client.Set(string(str), *res, time.Hour)
 		}
+
 		return nil
 	}
 
 	err = json.Unmarshal([]byte(val), res)
 	duration := time.Since(start).Seconds()
 	metric.Observe(duration)
+
 	return err
 }
 
@@ -164,6 +176,7 @@ func GetQuery(address models.ResponseAddress) string {
 			sb.WriteString(i)
 		}
 	}
+
 	return strings.Trim(sb.String(), "+")
 }
 

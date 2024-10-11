@@ -22,6 +22,7 @@ func (g *GeoRPC) Search(geocode models.RequestAddressGeocode) (models.ResponseAd
 	if err != nil {
 		return models.ResponseAddress{}, err
 	}
+
 	return res, nil
 }
 
@@ -31,5 +32,6 @@ func (g *GeoRPC) Geocode(address models.ResponseAddress) (models.ResponseAddress
 	if err != nil {
 		return models.ResponseAddressGeocode{}, err
 	}
+
 	return res, nil
 }

@@ -50,6 +50,7 @@ func NewServer() (*http.Server, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	geoProvider := service.NewGeoRPC(clientRPC)
 	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	responder := controller.NewResponder(logger)
@@ -61,5 +62,6 @@ func NewServer() (*http.Server, error) {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
 	return &server, nil
 }
