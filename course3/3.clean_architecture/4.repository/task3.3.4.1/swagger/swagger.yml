@@ -1,0 +1,120 @@
+openapi: 3.0.0
+
+
+info:
+  title: Swagger users - swagger "2.0"
+  description: |-
+    Users
+  version: 1.0.11
+
+servers:
+  - url: https://localhost:8080/api
+
+paths:
+  /users:
+    post:
+      summary: create user
+      operationId: create
+      requestBody:
+        description: create user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "200":
+          description: Successfuly create
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+    get:
+      summary: get all users
+      operationId: ReadAll
+      responses:
+        "200":
+          description: Successfuly
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+  /users/{username}:
+    get:
+      summary: get one user
+      operationId: Read
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+    delete:
+      summary: delete user
+      operationId: delete
+      responses:
+        "200":
+          description: Success
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+    put:
+      summary: create user
+      operationId: update
+      requestBody:
+        description: update user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "200":
+          description: Successfuly update
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "test"
+        password:
+          type: string
+          example: "test"
+
+

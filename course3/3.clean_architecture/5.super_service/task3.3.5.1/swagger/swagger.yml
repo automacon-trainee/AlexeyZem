@@ -1,0 +1,277 @@
+openapi: 3.0.0
+
+
+info:
+  title: Swagger users - swagger "2.0"
+  description: |-
+    golibrary
+  version: 1.0.11
+
+servers:
+  - url: https://localhost:8080/api
+
+paths:
+  /users:
+    post:
+      summary: create user
+      operationId: createuser
+      requestBody:
+        description: create user
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+        required: true
+      responses:
+        "200":
+          description: Successfuly create
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+    get:
+      summary: get all users
+      operationId: ReadAllUser
+      responses:
+        "200":
+          description: Successfuly
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/user'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+  /users/{id}:
+    get:
+      summary: get one user
+      operationId: ReadUser
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /authors:
+    post:
+      summary: create author
+      operationId: createAuthor
+      requestBody:
+        description: create author
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/author'
+        required: true
+      responses:
+        "200":
+          description: Successfuly create
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+    get:
+      summary: get all author
+      operationId: ReadAllAuthor
+      responses:
+        "200":
+          description: Successfuly
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/author'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+  /authors/{id}:
+    get:
+      summary: get one author
+      operationId: ReadAuthor
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/author'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /books:
+    post:
+      summary: create book
+      operationId: createBook
+      requestBody:
+        description: create book
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/book'
+        required: true
+      responses:
+        "200":
+          description: Successfuly create
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+    get:
+      summary: get all books
+      operationId: ReadAllBook
+      responses:
+        "200":
+          description: Successfuly
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/book'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+  /books/{id}:
+    get:
+      summary: get one book
+      operationId: Readook
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/book'
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+
+  /take/{id}:
+    post:
+      summary: take book
+      operationId: takeBook
+      requestBody:
+        description: take book
+        content:
+          application/json:
+            schema:
+              properties:
+                user_id:
+                  type: integer
+                  example: 0
+        required: true
+      responses:
+        "200":
+          description: Successfuly take
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+  /return:
+    post:
+      summary: return book
+      operationId: returnBook
+      requestBody:
+        description: return book
+        content:
+          application/json:
+            schema:
+              properties:
+                book_id:
+                  type: integer
+                  example: 0
+        required: true
+      responses:
+        "200":
+          description: Successfuly return
+        "400":
+          description: Bad request
+        "404":
+          description: NotFound
+        "500":
+          description: InternalServerError
+
+components:
+  schemas:
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        username:
+          type: string
+          example: "test"
+        books_taken:
+          type: array
+          items:
+            $ref: '#/components/schemas/book'
+    book:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: string
+          example: "Lion"
+        author:
+          type: string
+          example: "Martin"
+        author_id:
+          type: integer
+          example: 0
+        taken_by:
+          type: integer
+          example: 0
+    author:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 0
+        name:
+          type: integer
+          example: "Martin"
+        books:
+          type: array
+          items:
+            $ref: '#/components/schemas/book'
+
