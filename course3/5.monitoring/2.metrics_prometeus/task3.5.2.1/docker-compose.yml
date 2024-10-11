@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  project:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+  db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=mydbmetrics
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - DATABASE_HOST=db
+    volumes:
+      - postgres_data:/var/lib/postgresql/metrics_app_data
+    healthcheck:
+      test: "pg_isready --username=postgres && psql --username=postgres --list"
+      timeout: 10s
+      retries: 20
+
+volumes:
+  postgres_data:
