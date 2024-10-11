@@ -103,7 +103,8 @@ func (s *UserServiceProxy) AuthUser(user models.User) (string, error) {
 }
 
 func (s *UserServiceProxy) GetAllUsers() ([]models.User, error) {
-	histogram := s.metrics.NewDurationHistogram("GetAllUser_cache_histogram", "time for cache getAllUser",
+	histogram := s.metrics.NewDurationHistogram("GetAllUser_cache_histogram",
+		"time for cache getAllUser",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	start := time.Now()
 
@@ -116,6 +117,7 @@ func (s *UserServiceProxy) GetAllUsers() ([]models.User, error) {
 		if errors.Is(err, redis.Nil) {
 			s.client.Set("allUsers", users, time.Minute*5)
 		}
+
 		return users, nil
 	}
 
@@ -123,11 +125,13 @@ func (s *UserServiceProxy) GetAllUsers() ([]models.User, error) {
 	histogram.Observe(duration)
 	var users []models.User
 	err = json.Unmarshal([]byte(data), &users)
+
 	return users, err
 }
 
 func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
-	histogram := s.metrics.NewDurationHistogram("GetUserByEmail_endpoint_histogram", "time for cache getUserByEmail",
+	histogram := s.metrics.NewDurationHistogram("GetUserByEmail_endpoint_histogram",
+		"time for cache getUserByEmail",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	start := time.Now()
 
@@ -140,6 +144,7 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 		if errors.Is(err, redis.Nil) {
 			s.client.Set(email, user, time.Hour)
 		}
+
 		return user, nil
 	}
 
@@ -147,5 +152,6 @@ func (s *UserServiceProxy) GetUserByEmail(email string) (models.User, error) {
 	histogram.Observe(duration)
 	user := models.User{}
 	err = json.Unmarshal([]byte(data), &user)
+
 	return user, err
 }

@@ -34,6 +34,7 @@ func (g *GeoGRPC) Search(geocode models.RequestAddressGeocode) (models.ResponseA
 			CountryCode: resp.Address.CountryCode,
 		},
 	}
+
 	return res, nil
 }
 
@@ -47,6 +48,7 @@ func (g *GeoGRPC) Geocode(address models.ResponseAddress) (models.ResponseAddres
 		Country:     address.Address.Country,
 		CountryCode: address.Address.CountryCode,
 	}
+
 	resp, err := g.client.GeocodeAnswer(context.Background(), &req)
 	if err != nil {
 		return models.ResponseAddressGeocode{}, err
@@ -55,5 +57,6 @@ func (g *GeoGRPC) Geocode(address models.ResponseAddress) (models.ResponseAddres
 		Lat: resp.Lat,
 		Lon: resp.Lon,
 	}
+
 	return res, nil
 }
