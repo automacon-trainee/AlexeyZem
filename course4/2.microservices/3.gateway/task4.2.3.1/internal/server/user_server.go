@@ -18,8 +18,7 @@ import (
 func NewUserServer() (*http.Server, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
@@ -40,17 +39,20 @@ func NewUserServer() (*http.Server, error) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: "redis:6379",
 	})
+
 	userProxy := service.NewUserServiceProxy(userService, redisClient)
 	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	responder := controller.NewResponder(logger)
 
 	controll := controller.NewUserController(responder, userProxy)
 	rout := controller.NewUserRouter(controll)
+
 	server := http.Server{
 		Addr:         ":1080",
 		Handler:      rout,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
 	return &server, nil
 }
