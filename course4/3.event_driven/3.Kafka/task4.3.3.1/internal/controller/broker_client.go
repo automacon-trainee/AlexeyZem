@@ -22,18 +22,21 @@ func GetBroker(broker string) Broker {
 }
 
 func GetRabbitBroker() *amqp.Channel {
-	var conn *amqp.Connection
-	var err error
-	i := 0
-	maxAttemps := 10
+	var (
+		conn        *amqp.Connection
+		err         error
+		i           = 0
+		maxAttempts = 10
+	)
 	for conn, err = amqp.Dial("amqp://rabbitmq:rabbitmq@rabbitmq:5672/"); err != nil; conn, err = amqp.Dial("amqp://rabbitmq:rabbitmq@rabbitmq:5672/") {
 		log.Printf("try:%d:%v", i, err)
 		i++
 		time.Sleep(3 * time.Second)
-		if i > maxAttemps {
+		if i > maxAttempts {
 			log.Fatal("rabbit broker connect timeout", err)
 		}
 	}
+
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Println("Failed to open a channel", err)
@@ -46,10 +49,12 @@ func GetRabbitBroker() *amqp.Channel {
 		false,
 		nil,
 	)
+
 	if err != nil {
 		log.Println("Failed to declare a queue", err)
 	}
 	log.Println("rabbit start")
+
 	return ch
 }
 
@@ -83,6 +88,7 @@ func GetKafkaWriter() *kafka.Writer {
 		Balancer: &kafka.LeastBytes{},
 	}
 	log.Println("kafka start writer")
+
 	return writer
 }
 
