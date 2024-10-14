@@ -15,13 +15,18 @@ import (
 
 	"metrics/internal/API/gRPCAuth"
 	"metrics/internal/controller"
+	"metrics/internal/models"
 	"metrics/internal/repository"
 	"metrics/internal/service"
 )
 
+type AuthService interface {
+	VerifyToken(token string) (*models.User, error)
+}
+
 type AuthServ struct {
 	gRPCAuth.UnimplementedAuthServiceServer
-	authServer controller.AuthService
+	authServer AuthService
 }
 
 func (as *AuthServ) VerifyToken(ctx context.Context, token *gRPCAuth.Token) (*gRPCAuth.User, error) {
@@ -35,14 +40,14 @@ func (as *AuthServ) VerifyToken(ctx context.Context, token *gRPCAuth.Token) (*gR
 		Password: user.Password,
 		Id:       user.ID,
 	}
+
 	return res, nil
 }
 
 func NewAuthServer() (*http.Server, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
@@ -70,17 +75,20 @@ func NewAuthServer() (*http.Server, error) {
 	responder := controller.NewResponder(logger)
 	controll := controller.NewAuthController(responder, authService)
 	rout := controller.NewAuthRouter(controll)
+
 	server := http.Server{
 		Addr:         ":3080",
 		Handler:      rout,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
 	go startGRPC(authService)
+
 	return &server, nil
 }
 
-func startGRPC(auth controller.AuthService) {
+func startGRPC(auth AuthService) {
 	l, err := net.Listen("tcp", ":1234")
 	if err != nil {
 		log.Fatalf("failed to listen gRPC: %v", err)
@@ -89,7 +97,9 @@ func startGRPC(auth controller.AuthService) {
 	gRPCAuth.RegisterAuthServiceServer(server, &AuthServ{
 		authServer: auth,
 	})
+
 	log.Println("Listening on :1234 with protocol gRPC")
+
 	if err := server.Serve(l); err != nil {
 		log.Fatal(err)
 	}

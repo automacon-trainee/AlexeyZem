@@ -36,6 +36,7 @@ func NewMiddleware(auth gRPCAuth.AuthServiceClient, broker Broker) *Middleware {
 		broker:       broker,
 	}
 	go mid.CheckingCount()
+
 	return mid
 }
 
@@ -97,5 +98,6 @@ func getToken(r *http.Request) *gRPCAuth.Token {
 	tokenStr := r.Header.Get("Authorization")
 	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 	token := gRPCAuth.Token{Token: tokenStr}
+
 	return &token
 }

@@ -38,7 +38,8 @@ func NewUserController(responder UserResponder, servUser UserService) *UserContr
 }
 
 func (gc *UserControllerImpl) GetByEmail(w http.ResponseWriter, r *http.Request) {
-	histogram := gc.metrics.NewDurationHistogram("GetByEmail_endpoint_histogram", "time request to getByEmail endpoint",
+	histogram := gc.metrics.NewDurationHistogram("GetByEmail_endpoint_histogram",
+		"time request to getByEmail endpoint",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	counter := gc.metrics.NewCounter("GetByEmail_endpoint_counter", "count request to getByEmail endpoint")
 	counter.Inc()
@@ -47,16 +48,19 @@ func (gc *UserControllerImpl) GetByEmail(w http.ResponseWriter, r *http.Request)
 		duration := time.Since(start).Seconds()
 		histogram.Observe(duration)
 	}()
+
 	email := chi.URLParam(r, "email")
 	user, err := gc.serviceUser.GetUserByEmail(email)
 	if err != nil {
 		gc.responder.ErrorInternal(w, err)
 	}
+
 	gc.responder.OutputJSON(w, user)
 }
 
 func (gc *UserControllerImpl) GetAllUsers(w http.ResponseWriter, _ *http.Request) {
-	histogram := gc.metrics.NewDurationHistogram("GetAllUser_endpoint_histogram", "time request to getAllUser endpoint",
+	histogram := gc.metrics.NewDurationHistogram("GetAllUser_endpoint_histogram",
+		"time request to getAllUser endpoint",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	counter := gc.metrics.NewCounter("GetAllUser_endpoint_counter", "count request to getAllUser endpoint")
 	counter.Inc()
@@ -65,9 +69,11 @@ func (gc *UserControllerImpl) GetAllUsers(w http.ResponseWriter, _ *http.Request
 		duration := time.Since(start).Seconds()
 		histogram.Observe(duration)
 	}()
+
 	data, err := gc.serviceUser.GetAllUsers()
 	if err != nil {
 		gc.responder.ErrorInternal(w, err)
 	}
+
 	gc.responder.OutputJSON(w, data)
 }
