@@ -15,5 +15,6 @@ func GetProvider() gRPCAuth.AuthServiceClient {
 		log.Fatal(err)
 	}
 	client := gRPCAuth.NewAuthServiceClient(conn)
+
 	return client
 }

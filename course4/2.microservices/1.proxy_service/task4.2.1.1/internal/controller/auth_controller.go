@@ -40,7 +40,8 @@ func NewAuthController(responder AuthResponder, serviceAuth AuthService) *AuthCo
 }
 
 func (ac *AuthControllerImpl) Register(w http.ResponseWriter, r *http.Request) {
-	histogram := ac.metrics.NewDurationHistogram("Register_endpoint_histogram", "time request to register endpoint",
+	histogram := ac.metrics.NewDurationHistogram("Register_endpoint_histogram",
+		"time request to register endpoint",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	counter := ac.metrics.NewCounter("Register_endpoint_counter", "count request to register endpoint")
 	counter.Inc()
@@ -49,22 +50,26 @@ func (ac *AuthControllerImpl) Register(w http.ResponseWriter, r *http.Request) {
 		duration := time.Since(start).Seconds()
 		histogram.Observe(duration)
 	}()
-	regReq := models.RegisterRequest{}
-	err := json.NewDecoder(r.Body).Decode(&regReq)
-	if err != nil {
+
+	var regReq models.RegisterRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&regReq); err != nil {
 		ac.responder.ErrorBadRequest(w, err)
 		return
 	}
-	err = ac.serviceAuth.CreateUser(models.User{Username: regReq.Username, Password: regReq.Password, Email: regReq.Email})
-	if err != nil {
+
+	user := models.User{Username: regReq.Username, Password: regReq.Password, Email: regReq.Email}
+	if err := ac.serviceAuth.CreateUser(user); err != nil {
 		ac.responder.ErrorInternal(w, err)
 		return
 	}
+
 	ac.responder.OutputJSON(w, models.Data{Message: "user created"})
 }
 
 func (ac *AuthControllerImpl) Auth(w http.ResponseWriter, r *http.Request) {
-	histogram := ac.metrics.NewDurationHistogram("Auth_endpoint_histogram", "time request to auth endpoint",
+	histogram := ac.metrics.NewDurationHistogram("Auth_endpoint_histogram",
+		"time request to auth endpoint",
 		prometheus.LinearBuckets(0.1, 0.1, 10))
 	counter := ac.metrics.NewCounter("Auth_endpoint_counter", "count request to auth endpoint")
 	counter.Inc()
@@ -73,16 +78,19 @@ func (ac *AuthControllerImpl) Auth(w http.ResponseWriter, r *http.Request) {
 		duration := time.Since(start).Seconds()
 		histogram.Observe(duration)
 	}()
-	logReq := models.LoginRequest{}
-	err := json.NewDecoder(r.Body).Decode(&logReq)
-	if err != nil {
+
+	var logReq models.LoginRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&logReq); err != nil {
 		ac.responder.ErrorBadRequest(w, err)
 		return
 	}
+
 	token, err := ac.serviceAuth.AuthUser(models.User{Email: logReq.Email, Password: logReq.Password})
 	if err != nil {
 		ac.responder.ErrorUnAuthorized(w, err)
 		return
 	}
+
 	ac.responder.OutputJSON(w, models.Data{Message: token})
 }
