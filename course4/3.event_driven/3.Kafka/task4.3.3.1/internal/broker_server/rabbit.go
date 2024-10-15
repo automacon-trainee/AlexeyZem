@@ -12,10 +12,13 @@ import (
 )
 
 func StartRabbit(NotifyCl gRPCNotify.NotifyServiceClient) {
-	var conn *amqp.Connection
-	var err error
-	i := 0
-	maxAttemps := 10
+	var (
+		conn       *amqp.Connection
+		err        error
+		i          = 0
+		maxAttemps = 10
+	)
+
 	for conn, err = amqp.Dial("amqp://rabbitmq:rabbitmq@rabbitmq:5672/"); err != nil; conn, err = amqp.Dial("amqp://rabbitmq:rabbitmq@rabbitmq:5672/") {
 		log.Printf("try:%d:%v", i, err)
 		i++
@@ -25,6 +28,7 @@ func StartRabbit(NotifyCl gRPCNotify.NotifyServiceClient) {
 		}
 	}
 	defer conn.Close()
+
 	ch, err := conn.Channel()
 	if err != nil {
 		log.Fatal(err)
@@ -57,8 +61,7 @@ func StartRabbit(NotifyCl gRPCNotify.NotifyServiceClient) {
 		}
 		for msg := range msgs {
 			m := Message{}
-			err := json.Unmarshal(msg.Body, &m)
-			if err != nil {
+			if err := json.Unmarshal(msg.Body, &m); err != nil {
 				log.Println(err)
 			} else {
 				// отправка сообщения пользователю на почту

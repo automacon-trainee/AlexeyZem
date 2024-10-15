@@ -21,8 +21,7 @@ import (
 func NewServer() (*http.Server, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
@@ -62,6 +61,7 @@ func NewServer() (*http.Server, error) {
 			return nil, err
 		}
 	}
+
 	geoProvider := service.NewGeoRPC(clientRPC)
 	logger := log.New(os.Stdout, "", log.LstdFlags|log.Lmicroseconds|log.Lshortfile)
 	responder := controller.NewResponder(logger)
@@ -73,5 +73,6 @@ func NewServer() (*http.Server, error) {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
 	return &server, nil
 }

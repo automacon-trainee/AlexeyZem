@@ -40,6 +40,7 @@ func (a *AuthServiceImpl) CreateUser(user models.User) error {
 		return err
 	}
 	user.Password = string(hash)
+
 	return a.repo.Create(context.Background(), user)
 }
 
@@ -48,8 +49,7 @@ func (a *AuthServiceImpl) AuthUser(user models.User) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	err = bcrypt.CompareHashAndPassword([]byte(userBD.Password), []byte(user.Password))
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(userBD.Password), []byte(user.Password)); err != nil {
 		return "", fmt.Errorf("wrong password")
 	}
 
@@ -62,11 +62,12 @@ func (a *AuthServiceImpl) AuthUser(user models.User) (string, error) {
 		"email": user.Email,
 		"exp":   time.Now().Add(time.Hour * 2).Unix(),
 	}
+
 	_, token, _ := a.token.Encode(claims)
-	err = a.redisClient.Set(user.Email, token, time.Hour*2).Err()
-	if err != nil {
+	if err := a.redisClient.Set(user.Email, token, time.Hour*2).Err(); err != nil {
 		log.Println(err)
 	}
+
 	return token, nil
 }
 
@@ -91,5 +92,6 @@ func (a *AuthServiceImpl) VerifyToken(token string) (*models.User, error) {
 	if err != nil {
 		log.Println(err)
 	}
+
 	return &user, err
 }

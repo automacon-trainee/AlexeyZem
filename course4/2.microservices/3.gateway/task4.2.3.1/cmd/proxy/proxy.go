@@ -43,6 +43,7 @@ func CheckUrl(url string) string {
 			return ""
 		}
 	}
+
 	return ""
 }
 
@@ -52,5 +53,6 @@ func getProxy(str string) *httputil.ReverseProxy {
 		log.Println(err)
 		return nil
 	}
+
 	return httputil.NewSingleHostReverseProxy(target)
 }

@@ -34,7 +34,9 @@ func NewMiddleware(auth gRPCAuth.AuthServiceClient, broker Broker) *Middleware {
 		countRequest: make(map[string]int),
 		broker:       broker,
 	}
+
 	go mid.CheckingCount()
+
 	return mid
 }
 
@@ -56,8 +58,7 @@ func (m *Middleware) CheckingCount() {
 func (m *Middleware) AuthVerify(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := getToken(r)
-		_, err := m.auth.VerifyToken(context.Background(), token)
-		if err != nil {
+		if _, err := m.auth.VerifyToken(context.Background(), token); err != nil {
 			w.WriteHeader(http.StatusUnauthorized)
 			_, _ = w.Write([]byte(err.Error()))
 		} else {
@@ -73,6 +74,7 @@ func (m *Middleware) Limiter(next http.Handler) http.Handler {
 		if _, ok := m.countRequest[user.Email]; !ok {
 			m.countRequest[user.Email] = 5
 		}
+
 		if m.countRequest[user.Email] <= 0 {
 			w.WriteHeader(http.StatusTooManyRequests)
 			// send to rabbit message
@@ -93,5 +95,6 @@ func getToken(r *http.Request) *gRPCAuth.Token {
 	tokenStr := r.Header.Get("Authorization")
 	tokenStr = strings.TrimPrefix(tokenStr, "Bearer ")
 	token := gRPCAuth.Token{Token: tokenStr}
+
 	return &token
 }

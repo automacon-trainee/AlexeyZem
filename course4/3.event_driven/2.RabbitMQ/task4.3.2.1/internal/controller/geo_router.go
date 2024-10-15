@@ -28,5 +28,6 @@ func NewGeoRouter(controller GeoController) *chi.Mux {
 		router.Get("/metrics", promhttp.Handler().ServeHTTP)
 	})
 	router.NotFound(handlerNot)
+
 	return router
 }

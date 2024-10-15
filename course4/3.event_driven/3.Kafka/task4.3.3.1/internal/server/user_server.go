@@ -18,8 +18,7 @@ import (
 func NewUserServer() (*http.Server, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
-	err := godotenv.Load()
-	if err != nil {
+	if err := godotenv.Load(); err != nil {
 		return nil, err
 	}
 
@@ -55,5 +54,6 @@ func NewUserServer() (*http.Server, error) {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+
 	return &server, nil
 }

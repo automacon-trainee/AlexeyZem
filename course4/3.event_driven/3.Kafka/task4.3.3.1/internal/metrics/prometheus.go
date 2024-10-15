@@ -15,10 +15,10 @@ func newCounter(name, help string) prometheus.Counter {
 		Name: name,
 		Help: help,
 	})
-	err := prometheus.Register(counter)
-	if err != nil {
+	if err := prometheus.Register(counter); err != nil {
 		log.Println(err)
 	}
+
 	return counter
 }
 
@@ -28,10 +28,10 @@ func newDurationHistogram(name, help string, buckets []float64) prometheus.Histo
 		Help:    help,
 		Buckets: buckets,
 	})
-	err := prometheus.Register(histogram)
-	if err != nil {
+	if err := prometheus.Register(histogram); err != nil {
 		log.Println(err)
 	}
+
 	return histogram
 }
 
@@ -52,6 +52,7 @@ func (m *ProxyMetrics) NewCounter(name, help string) prometheus.Counter {
 		m.store[name+help] = counter
 		return counter
 	}
+
 	return val.(prometheus.Counter)
 }
 
@@ -60,6 +61,7 @@ func (m *ProxyMetrics) NewDurationHistogram(name, help string, buckets []float64
 	for i, b := range buckets {
 		bucketsStr[i] = strconv.FormatFloat(b, 'f', -1, 64)
 	}
+
 	buck := strings.Join(bucketsStr, ";")
 	val, ok := m.store[name+help+buck]
 	if !ok {
@@ -67,5 +69,6 @@ func (m *ProxyMetrics) NewDurationHistogram(name, help string, buckets []float64
 		m.store[name+help+buck] = histogram
 		return histogram
 	}
+
 	return val.(prometheus.Histogram)
 }
